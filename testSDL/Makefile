@@ -16,4 +16,4 @@ $(TARGET): $(OBJS)
 clean: 
 	-rm -f *.o $(TARGET)
 
-#gcc main.cpp -lSDL2 -lSDL2main -lSDL2_image -o sdl2minimal 
+#gcc main.cpp -lSDL2 -lSDL2main -lSDL2_image -o test 

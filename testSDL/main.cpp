@@ -109,10 +109,24 @@ int main(int argc, char *argv[])
         // upper boundary
         if (dest.y < 0)
             dest.y = 0;
- 
+
+        SDL_SetRenderDrawColor( rend, 255, 0, 0, 255 );
+
+        SDL_Rect r;
+        r.x = 50;
+        r.y = 50;
+        r.w = 150;
+        r.h = 150;
+
+        // Set render color to blue ( rect will be rendered in this color )
+        SDL_SetRenderDrawColor( rend, 0, 0, 255, 255 );
+
+        // Render rect
+        SDL_RenderFillRect( rend, &r );
+
         // clears the screen
-        SDL_RenderClear(rend);
-        SDL_RenderCopy(rend, tex, NULL, &dest);
+        // SDL_RenderClear(rend);
+        // SDL_RenderCopy(rend, tex, NULL, &dest);
  
         // triggers the double buffers
         // for multiple rendering
