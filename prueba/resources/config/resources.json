@@ -1,0 +1,37 @@
+{
+
+  "fonts" : [
+    { "id" : "ARIAL16", "file" : "resources/fonts/ARIAL.ttf", "size": 16 },
+    { "id" : "ARIAL24", "file" : "resources/fonts/ARIAL.ttf", "size": 24 },
+    { "id" : "ARIAL48", "file" : "resources/fonts/ARIAL.ttf", "size": 48 }
+  ],
+  
+  "images" : [
+    { "id" : "fighter", "file" : "resources/images/fighter.png"},
+    { "id" : "heart", "file" : "resources/images/heart.png"},
+	  { "id" : "fire", "file" : "resources/images/fire.png"},
+	  { "id" : "asteroid", "file" : "resources/images/asteroid.png"},
+	  { "id" : "asteroid_gold", "file" : "resources/images/asteroid_gold.png"}
+  ],
+  
+  "messages" : [
+    { "id" : "start", "text" : "Press SPACE to play", "font" : "ARIAL16", "color" : "0x112233ff", "bg" : "0xffffffff" },
+    { "id" : "continue", "text" : "Press SPACE to continue", "font" : "ARIAL16", "color" : "0x0000ffff", "bg" : "0xffffffff"},
+    { "id" : "gameover", "text" : "YOU DIED", "font" : "ARIAL16", "color" : "0x0000ffff", "bg" : "0xffffffff" },
+	  { "id" : "win", "text" : "YOU HAVE WON", "font" : "ARIAL16", "color" : "0x0000ffff", "bg" : "0xffffffff" }
+  ],
+  
+  "sounds" : [
+    { "id" : "thrust", "file" : "resources/sound/thrust.wav" },
+    { "id" : "fire", "file" : "resources/sound/fire.wav" }, 
+	  { "id" : "explosion", "file" : "resources/sound/explosion.wav" },
+	  { "id" : "bang", "file" : "resources/sound/bangSmall.wav" }
+	
+  ],
+
+  "musics" : [
+    { "id" : "beat", "file" : "resources/sound/beat.wav" },
+    { "id" : "imperial_march", "file" : "resources/sound/imperial_march.wav" }
+  ]
+
+}
