@@ -33,5 +33,5 @@
 # Binaries
 *.bin
 
-# vscode
-.vscode
+# # vscode
+# .vscode

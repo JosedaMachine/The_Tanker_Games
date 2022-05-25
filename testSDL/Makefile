@@ -1,4 +1,4 @@
-CC = gcc
+CC = g++
 CFLAGS = -lSDL2 -lSDL2main -lSDL2_image
 
 OUTPUT = sdl2minimal
@@ -8,12 +8,10 @@ OBJS = $(TARGET).o
 all: $(TARGET)
 
 $(TARGET): $(OBJS) 
-	$(CC) $(CFLAGS) -o $(OUTPUT).out $(OBJS)
+	$(CC) -o $(OUTPUT).out $(OBJS) $(CFLAGS)
 
 %.o : %.cpp
 	$(CC) -c $(CFLAGS) $< -o $@
 
 clean: 
-	-rm -f *.o $(TARGET)
-
-#gcc main.cpp -lSDL2 -lSDL2main -lSDL2_image -o test 
+	-rm -f *.o $(OUTPUT).out
