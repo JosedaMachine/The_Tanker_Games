@@ -43,8 +43,8 @@ int main(int argc, char *argv[])
         printf("%s\n", SDL_GetError());
  
     // loads image to our graphics hardware memory.
-    SDL_Texture* tex = SDL_CreateTextureFromSurface(rend, surface);
     // SDL_Texture* tex = IMG_LoadTexture(rend, "./resources/images/tank.png");
+    SDL_Texture* tex = SDL_CreateTextureFromSurface(rend, surface);
     if (tex == nullptr)
         printf("%s\n", SDL_GetError());
 
