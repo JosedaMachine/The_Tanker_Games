@@ -12,7 +12,7 @@ all: $(TARGET)
 $(TARGET): $(OBJS) 
 	$(CC) -o $(OUTPUT).out $(OBJS) $(CFLAGS)
 
-%.o : %.cpp
+%.o : %.cpp Game.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 clean: 

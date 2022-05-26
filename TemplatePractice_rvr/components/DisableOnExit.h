@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DISABLE_ON_EXIT_H_
+#define DISABLE_ON_EXIT_H_
 
 #include "../ecs/Component.h"
 #include "../ecs/Entity.h"
@@ -30,3 +31,4 @@ public:
 private:
 	Transform* tr_;
 };
+#endif
