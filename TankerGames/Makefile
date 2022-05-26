@@ -5,10 +5,10 @@
 # Compiler settings - Can be customized.
 CC = g++
 CXXFLAGS = -std=c++11 -Wall -g
-LDFLAGS = -lSDL2 -lGL -lGLEW
+LDFLAGS = -lSDL2 -lSDL2main -lSDL2_image
 
 # Makefile settings - Can be customized.
-APPNAME = finalProj
+APPNAME = TankerGames
 EXT = .cpp
 SRCDIR = src
 OBJDIR = obj
