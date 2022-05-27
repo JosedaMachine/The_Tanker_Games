@@ -10,22 +10,17 @@
 class GameObject;
 class SDL_Renderer;
 
-class Game{
+class Game
+{
 public:
-     Game();
-     virtual ~Game();
-     
-     void init(int w, int h);
-     void run();
+    Game();
+    virtual ~Game();
+
+    void init(int w, int h);
+    void run();
+    void shutdown();
 
 private:
-
-    std::vector<GameObject*> objs_;
-    SDL_Renderer* rend;
-    SDL_Window* win;
-    SDL_Texture* tex;
-    int speed, close;
-    int width_, height_;
-    SDL_Rect dest;
+    std::vector<GameObject *> objs_;
 };
 #endif

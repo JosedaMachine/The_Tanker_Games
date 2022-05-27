@@ -12,6 +12,7 @@ void start(){
 
     g.init(1000, 600);
     g.run();
+    g.shutdown();
 }
 
 int main(int argc, char *argv[]){

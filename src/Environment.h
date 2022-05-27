@@ -1,34 +1,22 @@
-// This file is part of the course TPV2@UCM - Samir Genaim
-
-#pragma once
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 
-#include <SDL2/SDL.h>
 #include <string>
 #include <map>
 
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+
 #include "Singleton.h"
 #include "RandomNumberGenerator.h"
-#include "Font.h"
-
+#include "macros.h"
 
 class Environment: public Singleton<Environment> {
 
 	friend Singleton<Environment> ; // needed to give access to private constructors
 
 public:
-
-	// we abstract away the actual data structure we use for
-	// tables. All we assume is that is has the following
-	// methods
-	//
-	//   emplace(key,value)
-	//   at(key)
-	//   clear()
-	//
-	template<typename T>
-	using sdl_resource_table = std::map<std::string,T>;
 
 	virtual ~Environment();
 
@@ -108,8 +96,6 @@ public:
 private:
 	Environment();
 	Environment(std::string windowTitle, int width, int height);
-	Environment(std::string windowTitle, int width, int height,
-			std::string filename);
 
 	void initWindow();
 	void closeWindow();
@@ -130,6 +116,6 @@ private:
 // This macro defines a compact way for using the singleton Environment, instead of
 // writing Environment::instance()->method() we write Environment().method()
 //
-inline Environment& Environment() {
+inline Environment& environment() {
 	return *Environment::instance();
 }
