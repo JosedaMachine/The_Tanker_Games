@@ -1,12 +1,12 @@
+#include "Game.h"
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_timer.h>
-#include "Game.h"
-Game::Game(){
 
-}
+Game::Game() {}
 
-Game::~Game(){
+Game::~Game() {
     // destroy texture
     SDL_DestroyTexture(tex);
  
@@ -33,44 +33,16 @@ void Game::init(int w, int h){
     if ((initted & flags) != flags)
         printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
         
-    win = SDL_CreateWindow("GAME", // creates a window
-                                       SDL_WINDOWPOS_CENTERED,
-                                       SDL_WINDOWPOS_CENTERED,
-                                       width_, height_, 0);
+    win = SDL_CreateWindow("My Game", // creates a window
+                        SDL_WINDOWPOS_CENTERED,
+                        SDL_WINDOWPOS_CENTERED,
+                        width_, height_, 0);
  
     // triggers the program that controls
     // your graphics hardware and sets flags
     Uint32 render_flags = SDL_RENDERER_ACCELERATED;
-
-    
     // creates a renderer to render our images
     rend = SDL_CreateRenderer(win, -1, render_flags);
- 
-       // creates a surface to load an image into the main memory
-    SDL_Surface* surface = nullptr;
- 
-    // please provide a path for your image
-    // surface = SDL_LoadBMP("./resources/images/ffxiv_04042022_233028_299.bmp");
-    surface = IMG_Load("./resources/images/tank.png");
-    if (surface == nullptr)
-        printf("%s\n", SDL_GetError());
- 
-    // loads image to our graphics hardware memory.
-    // SDL_Texture* tex = IMG_LoadTexture(rend, "./resources/images/tank.png");
-    tex = SDL_CreateTextureFromSurface(rend, surface);
-    if (tex == nullptr)
-        printf("%s\n", SDL_GetError());
-
-    SDL_RenderCopy(rend, tex, NULL, NULL);
-    SDL_RenderPresent(rend);
-
-    // clears main-memory
-    SDL_FreeSurface(surface);
- 
-    // let us control our image position
-    // so that we can move it with our keyboard.
-    // connects our texture with dest to control position
-    SDL_QueryTexture(tex, NULL, NULL, &dest.w, &dest.h);
  
     // adjust height and width of our image box.
     dest.w /= 6;
@@ -89,7 +61,7 @@ void Game::init(int w, int h){
     speed = 300;
 }
 
-void Game::start(){
+void Game::run() {
     // animation loop
     while (!close) {
         SDL_Event event;
@@ -176,6 +148,3 @@ void Game::start(){
         SDL_Delay(1000 / 60);
     }
 }
-
-
-

@@ -1,54 +1,48 @@
-// This file is part of the course TPV2@UCM - Samir Genaim
+#ifndef GAME_OBJECT_H_
+#define GAME_OBJECT_H_
 
-#pragma once
-
+#include <cassert>
 
 #include <SDL2/SDL.h>
 
 #include "Vector2D.h"
 
-
 class GameObject {
 public:
-	GameObject() :
-			pos_(), vel_(), width_(), height_() {
-	}
-	virtual ~GameObject() {
-	}
+	GameObject() : tr_(), dim_(), text_(nullptr) {}
+
+	virtual ~GameObject() {}
 
 	virtual void handleInput(const SDL_Event &event) = 0;
 	virtual void update() = 0;
-	virtual void render() = 0;
 
-	inline float getHeight() const {
-		return height_;
+	void render();
+
+	void setTexture(const std::string& path);
+
+	inline Vector2D& getTransform() {
+		return tr_;
 	}
 
-	inline void setHeight(float height) {
-		height_ = height;
+	inline Vector2D& getDimensions() {
+		return dim_;
 	}
 
-	inline Vector2D& getPos() {
-		return pos_;
-	}
-
-	inline Vector2D& getVel() {
-		return vel_;
-	}
-
-	inline float getWidth() const {
-		return width_;
-	}
-
-	inline void setWidth(float width) {
-		width_ = width;
+	inline SDL_Texture* getTexture() {
+		return text_;
 	}
 
 protected:
 
-	Vector2D pos_;
-	Vector2D vel_;
-	float width_;
-	float height_;
-};
+	Vector2D tr_;
+	Vector2D dim_;
 
+	float rotation;
+
+	SDL_Texture* text_;
+	Vector2D textDim_;
+    
+	void render(const SDL_Rect &src, const SDL_Rect &dest,
+            const SDL_Point *p = nullptr, SDL_RendererFlip flip = SDL_FLIP_NONE);
+};
+#endif

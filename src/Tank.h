@@ -1,13 +1,15 @@
+#ifndef TANK_H_
+#define TANK_H_
+
 #include "GameObject.h"
 
-class Tank: public GameObject{
+class Tank: public GameObject {
 public:
     Tank(int w, int h, SDL_Renderer* rend);
     virtual ~Tank();
 
     void handleInput(const SDL_Event &) override;
     void update() override;
-    void render() override;
 
     inline void setKeys(SDL_Scancode up, SDL_Scancode down, SDL_Scancode stop){
         up_ = up;
@@ -28,3 +30,4 @@ private:
     SDL_Renderer* renderer_;
     int heightApp_, widthApp_;
 };
+#endif

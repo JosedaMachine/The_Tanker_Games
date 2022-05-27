@@ -1,28 +1,21 @@
 #include <unistd.h>
-
-
 #include <iostream>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_timer.h>
 
 #include "Game.h"
 
-
 void start(){
+    // char buffer[256];    
+    // getcwd( buffer, 256 );
+    // printf("%s\n", buffer);
+
     Game g;
 
-    g.init(1000, 1000);
-    g.start();
+    g.init(1000, 600);
+    g.run();
 }
 
 int main(int argc, char *argv[]){
-
-    char buffer[256];    
-    getcwd( buffer, 256 );
-    printf("%s\n", buffer);
-
-    try{
+    try {
         start();
     }
     catch(const std::string& e)
