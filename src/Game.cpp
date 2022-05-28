@@ -20,7 +20,7 @@ void Game::init(int w, int h)
 	Tank* t = new Tank();
 	t->setTransform(environment().width() / 2, environment().height() / 2);
 	t->setDimensions(60, 60);
-	t->setTexture("./resources/images/tank.png");
+	t->setTexture("./resources/images/fighter.png");
 	t->setKeys(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D);
 	t->setSpeed(1);
 
