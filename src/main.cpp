@@ -10,7 +10,7 @@ void start(){
 
     Game g;
 
-    g.init(1000, 600);
+    g.init(1080, 720);
     g.run();
     g.shutdown();
 }

@@ -18,6 +18,10 @@ void GameObject::setDimensions(const int w, const int h) {
     dim_.set(w, h);
 }
 
+Vector2D GameObject::getDimensions() const {
+    return dim_;
+}
+
 void GameObject::setTexture(const std::string &path) {
     SDL_Surface *surface = IMG_Load(path.c_str());
     if (surface == nullptr)

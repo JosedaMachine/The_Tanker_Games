@@ -20,6 +20,8 @@ public:
     void run();
     void shutdown();
 
+    void refresh();
+
 private:
     std::vector<GameObject *> objs_;
 };

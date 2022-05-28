@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_timer.h>
+#include <algorithm>
 
 #include "Environment.h"
 #include "GameObject.h"
@@ -17,11 +18,11 @@ void Game::init(int w, int h)
 {
 	Environment::init("My Game", w, h);
 
-	Tank* t = new Tank();
+	Tank* t = new Tank(&objs_);
 	t->setTransform(environment().width() / 2, environment().height() / 2);
 	t->setDimensions(60, 60);
-	t->setTexture("./resources/images/fighter.png");
-	t->setKeys(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D);
+	t->setTexture("./resources/images/tank_blue.png");
+	t->setKeys(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_SPACE);
 	t->setSpeed(1);
 
 	objs_.push_back(t);
@@ -46,19 +47,27 @@ void Game::run()
 				continue;
 			}
 
-			for (auto &o : objs_)
-				o->handleInput(event);
+			for (auto &o : objs_){
+				if(o->isEnabled())
+					o->handleInput(event);
+			}
 		}
 
 		// update
-		for (auto &o : objs_)
-			o->update();
+		for (auto &o : objs_){
+			if(o->isEnabled())
+				o->update();
+		}
+
+		refresh();
 
 		environment().clearRenderer();
 
 		// render
-		for (auto &o : objs_)
-			o->render();
+		for (auto &o : objs_){
+			if(o->isEnabled())
+				o->render();
+		}
 
 		environment().presentRenderer();
 		Uint32 frameTime = environment().currRealTime() - startTime;
@@ -72,4 +81,21 @@ void Game::shutdown()
 {
 	for (unsigned int i = 0; i < objs_.size(); i++)
 		delete objs_[i];
+}
+
+void Game::refresh(){
+	objs_.erase( //
+		std::remove_if( //
+			objs_.begin(), //
+			objs_.end(), //
+			[](const GameObject* e) { //
+				if (e->isEnabled()) {
+					return false;
+				}
+				else {
+					delete e;
+					return true;
+				}
+			}), //
+		objs_.end());
 }
