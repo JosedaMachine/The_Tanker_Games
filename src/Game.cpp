@@ -7,7 +7,7 @@
 
 #include "Environment.h"
 #include "GameObject.h"
-
+#include "Background.h"
 #include "Tank.h"
 
 Game::Game() {}
@@ -16,7 +16,14 @@ Game::~Game() {}
 
 void Game::init(int w, int h)
 {
-	Environment::init("My Game", w, h);
+	Environment::init("The Tanker's Games", w, h);
+
+	Background* bG = new Background();
+	bG->setTransform(0, 0);
+	bG->setDimensions(w, h);
+	bG->setTexture("./resources/images/background.png");
+
+	objs_.push_back(bG);
 
 	Tank* t = new Tank(&objs_);
 	t->setTransform(environment().width() / 2, environment().height() / 2);
