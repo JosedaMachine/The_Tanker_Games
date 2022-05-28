@@ -4,7 +4,7 @@
 
 # Compiler settings - Can be customized.
 CC = g++
-CXXFLAGS = -std=c++11 -Wall -g
+CXXFLAGS = -std=c++17 -Wall -g
 LDFLAGS = -lSDL2 -lSDL2main -lSDL2_image -lSDL2_ttf
 
 # Makefile settings - Can be customized.

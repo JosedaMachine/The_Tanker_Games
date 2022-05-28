@@ -9,28 +9,19 @@
 
 class GameObject {
 public:
-	GameObject() : tr_(), dim_(), text_(nullptr) {}
+	GameObject() : tr_(), dim_(), rotation(0), text_(nullptr), textDim_() {}
 
-	virtual ~GameObject() {}
+	virtual ~GameObject();
 
 	virtual void handleInput(const SDL_Event &event) = 0;
 	virtual void update() = 0;
 
 	void render();
 
+	void setTransform(const int x, const int y);
+	void setDimensions(const int w, const int h);
+
 	void setTexture(const std::string& path);
-
-	inline Vector2D& getTransform() {
-		return tr_;
-	}
-
-	inline Vector2D& getDimensions() {
-		return dim_;
-	}
-
-	inline SDL_Texture* getTexture() {
-		return text_;
-	}
 
 protected:
 
