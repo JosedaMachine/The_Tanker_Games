@@ -3,6 +3,7 @@
 #include "Bullet.h"
 
 #include "Environment.h"
+#include "GameManager.h"
 
 Tank::Tank(std::vector<GameObject *>* objs_) : GameObject(), vel_(), speed_(0) , deacceleration_(0.5) {
 	gameObjs_ = objs_;
@@ -35,21 +36,21 @@ void Tank::update()
 
 	tr_ = tr_ + vel_;
 
-	if (tr_.getY() < 0) {
-		tr_.setY(0);
+	if (tr_.getY() < GameManager::instance()->getRelativeScenerioLimits().getY()) {
+		tr_.setY(GameManager::instance()->getRelativeScenerioLimits().getY());
 		vel_.setY(0);
 	}
-	else if (tr_.getY() + dim_.getY() > environment().height()) {
-		tr_.setY(environment().height() - dim_.getY());
+	else if (tr_.getY() + dim_.getY() > GameManager::instance()->getScenerioLimits().getY()) {
+		tr_.setY(GameManager::instance()->getScenerioLimits().getY() - dim_.getY());
 		vel_.setY(0);
 	}
 
-	if (tr_.getX() < 0) {
-		tr_.setX(0);
+	if (tr_.getX() < GameManager::instance()->getRelativeScenerioLimits().getX()) {
+		tr_.setX(GameManager::instance()->getRelativeScenerioLimits().getX());
 		vel_.setX(0);
 	}
-	else if (tr_.getX() + dim_.getX() > environment().width()) {
-		tr_.setX(environment().width() - dim_.getX());
+	else if (tr_.getX() + dim_.getX() > GameManager::instance()->getScenerioLimits().getX()) {
+		tr_.setX(GameManager::instance()->getScenerioLimits().getX() - dim_.getX());
 		vel_.setX(0);
 	}
 

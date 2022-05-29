@@ -9,6 +9,7 @@
 #include "GameObject.h"
 #include "Background.h"
 #include "Tank.h"
+#include "GameManager.h"
 
 Game::Game() {}
 
@@ -17,6 +18,7 @@ Game::~Game() {}
 void Game::init(int w, int h)
 {
 	Environment::init("The Tanker's Games", w, h);
+	GameManager::init();
 
 	Background* bG = new Background();
 	bG->setTransform(0, 0);
