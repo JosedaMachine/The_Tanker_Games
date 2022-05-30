@@ -5,29 +5,41 @@
 #include "../SDL_Utils/Environment.h"
 #include "../Managers/GameManager.h"
 
-Tank::Tank(std::vector<GameObject *>* objs_) : GameObject(), vel_(), speed_(0) , deacceleration_(0.5) {
-	gameObjs_ = objs_;
+Tank::Tank(App* game) : GameObject(), vel_(), speed_(0) , deacceleration_(0.5) {
+	app_ = game;
+	gameObjs_ = game->getGOsReference();
 }
 
 Tank::~Tank() {}
 
-void Tank::handleInput(const SDL_Event &e)
-{
+void Tank::handleInput(const SDL_Event &e) {
 	if (e.type == SDL_KEYDOWN){
-		if (e.key.keysym.scancode == up_)
-			vel_ = vel_ + Vector2D(0, -1).rotate(rotation) * speed_;
-		else if (e.key.keysym.scancode == down_)
-			vel_ = vel_ + Vector2D(0, 1).rotate(rotation) * 0.7f *speed_;
+		key = TankMessageClient::InputType::NONE; 
+		if (e.key.keysym.scancode == up_){
+			key = TankMessageClient::InputType::FRONT; 
+			// vel_ = vel_ + Vector2D(0, -1).rotate(rotation) * speed_;
+		}
+		else if (e.key.keysym.scancode == down_){
+			key = TankMessageClient::InputType::BACK;
+			// vel_ = vel_ + Vector2D(0, 1).rotate(rotation) * 0.7f *speed_;
+		}
 		
-		if (e.key.keysym.scancode == left_)
-			rotation = (rotation - 5.0f);
-		else if (e.key.keysym.scancode == right_)
-			rotation = (rotation + 5.0f);
+		if (e.key.keysym.scancode == left_){
+			key = TankMessageClient::InputType::LEFT;
+			// rotation = (rotation - 5.0f);
+		}
+		else if (e.key.keysym.scancode == right_){
+			key = TankMessageClient::InputType::RIGHT;
+			// rotation = (rotation + 5.0f);
+		}
 
 		if(e.key.keysym.scancode == shoot_){
+			key = TankMessageClient::InputType::SHOOT;
 			shoot();
 		}
+		app_->sendGameMessage(key);
 	}
+
 }
 
 void Tank::update()

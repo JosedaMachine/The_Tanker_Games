@@ -27,7 +27,7 @@ void App::init(int w, int h) {
 	objs_.push_back(bG);
 
 	float speed = 2.0f;
-	player_1 = new Tank(&objs_);
+	player_1 = new Tank(this);
 	player_1->setTransform(GameManager().getScenerioLimits().getX() * 0.2, environment().height() / 2);
 	player_1->setDimensions(60, 60);
 	player_1->setTexture("./resources/images/tank_blue.png");
@@ -35,7 +35,7 @@ void App::init(int w, int h) {
 	player_1->setSpeed(speed);
 	objs_.push_back(player_1);
 
-	player_2 = new Tank(&objs_);
+	player_2 = new Tank(this);
 	player_2->setTransform(GameManager().getScenerioLimits().getX() * 0.8, environment().height() / 2);
 	player_2->setDimensions(60, 60);
 	player_2->setTexture("./resources/images/tank_red.png");
@@ -44,8 +44,32 @@ void App::init(int w, int h) {
 
 	objs_.push_back(player_2);
 
+	initConnection();
+}
+
+void App::initConnection(){
+	std::thread([this](){
+		netMessage_thread();
+    }).detach();
+
 	sendMatchMessage(TankMessageClient::ClientMessageType::REGISTER);
 	std::cout << "Trying to log...\n";
+}
+
+void App::netMessage_thread(){
+	TankMessageServer net_message;
+    Socket* net_socket = new Socket(client_socket);
+    while(true) {
+		//process data from server
+    }
+}
+
+std::vector<GameObject *>* App::getGOsReference(){
+	return &objs_;
+}
+
+void App::updateGOsInfo(){
+	
 }
 
 void App::run()
@@ -104,6 +128,15 @@ void App::sendMatchMessage(TankMessageClient::ClientMessageType msg){
 	TankMessageClient login;
 	login.type = msg;
 	client_socket.send(login, client_socket);
+	printf("Sending Match Message...\n");
+}
+
+void App::sendGameMessage(TankMessageClient::InputType input){
+	TankMessageClient login;
+	login.type = TankMessageClient::ClientMessageType::HANDLE_INPUT;
+	login.input = input;
+	client_socket.send(login, client_socket);
+	printf("Sending Game Message...\n");
 }
 
 void App::shutdown()

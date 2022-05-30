@@ -2,11 +2,13 @@
 #define TANK_H_
 
 #include "../SDL_Utils/GameObject.h"
+#include "../Managers/App.h"
+
 #include <vector>
 
 class Tank: public GameObject {
 public:
-    Tank(std::vector<GameObject *>* objs_);
+    Tank(App* game);
     virtual ~Tank();
 
     void handleInput(const SDL_Event &) override;
@@ -23,8 +25,9 @@ public:
     }
     
 private:
-
     void shoot();
+
+    App* app_;
 
     Vector2D vel_;
 	float speed_;
@@ -32,6 +35,7 @@ private:
 
     std::vector<GameObject *>* gameObjs_;
 
+    TankMessageClient::InputType key;
 	SDL_Scancode up_, down_, left_, right_, shoot_;
 };
 #endif
