@@ -1,11 +1,11 @@
 #include <unistd.h>
 #include <iostream>
 
-#include "./Managers/Game.h"
+#include "./Managers/App.h"
 
 void start(char **argv){
 
-    Game g(argv[1], argv[2]);
+    App g(argv[1], argv[2]);
 
     g.init(1080, 720);
     g.run();

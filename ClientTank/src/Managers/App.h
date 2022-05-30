@@ -18,10 +18,10 @@ class GameObject;
 class SDL_Renderer;
 class Tank;
 
-class Game {
+class App {
 public:
-    Game(const char * s, const char * p);
-    virtual ~Game();
+    App(const char * s, const char * p);
+    virtual ~App();
 
     void init(int w, int h);
     void run();

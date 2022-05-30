@@ -1,4 +1,4 @@
-#include "Game.h"
+#include "App.h"
 
 
 #include "../Game/Background.h"
@@ -10,12 +10,12 @@
 
 #include "GameManager.h"
 
-Game::Game(const char *s, const char *p) : client_socket(s, p){
+App::App(const char *s, const char *p) : client_socket(s, p){
 };
 
-Game::~Game() {}
+App::~App() {}
 
-void Game::init(int w, int h) {
+void App::init(int w, int h) {
 	Environment::init("The Tanker's Games", w, h);
 	GameManager::init();
 
@@ -48,7 +48,7 @@ void Game::init(int w, int h) {
 	std::cout << "Trying to log...\n";
 }
 
-void Game::run()
+void App::run()
 {
 	bool close = false;
 	SDL_Event event;
@@ -100,19 +100,19 @@ void Game::run()
 	std::cout << "Quitting...\n";
 }
 
-void Game::sendMatchMessage(TankMessageClient::ClientMessageType msg){
+void App::sendMatchMessage(TankMessageClient::ClientMessageType msg){
 	TankMessageClient login;
 	login.type = msg;
 	client_socket.send(login, client_socket);
 }
 
-void Game::shutdown()
+void App::shutdown()
 {
 	for (unsigned int i = 0; i < objs_.size(); i++)
 		delete objs_[i];
 }
 
-void Game::refresh(){
+void App::refresh(){
 	objs_.erase( //
 		std::remove_if( //
 			objs_.begin(), //
