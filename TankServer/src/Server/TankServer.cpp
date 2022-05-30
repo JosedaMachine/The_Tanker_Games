@@ -1,74 +1,89 @@
 #include "TankServer.h"
-#include "../Utils/TankMessageClient.h"
+
 #include <iostream>
 
-TankServer::TankServer(const char * s, const char * p): server_socket(s, p) {
+#include "../Utils/TankMessageClient.h"
+
+TankServer::TankServer(const char *s, const char *p) : server_socket(s, p)
+{
     server_socket.bind();
 
     tank_1 = tank_2 = nullptr;
 };
 
-void TankServer::searchingPlayers(){
-    std::cout << "Waiting for players...\n";
-    waitForPlayer(tank_1);
-    std::cout << "Player 1 Connected.\n";
-    waitForPlayer(tank_2);
-    std::cout << "Player 2 Connected.\n";
-}
+void TankServer::game_thread()
+{
+    while (true)
+    {
+        TankMessageClient client_recv_msg;
+        Socket *client_player_sock;
+        server_socket.recv(client_recv_msg, client_player_sock);
 
-void TankServer::waitForPlayer(Socket* tank){
-    while(tank == nullptr){
-        TankMessageClient receptor;
-        Socket* player;   
-        server_socket.recv(receptor, player);
-        if(receptor.type == TankMessageClient::MessageType::REGISTER){
-            tank = player;
+        switch (client_recv_msg.type)
+        {
+        case TankMessageClient::ClientMessageType::REGISTER:
+        { // - REGISTER: register player on server data base
+            printf("REGISTER\n");
+
+            addPlayer(client_player_sock);
+
+            break;
+        }
+        case TankMessageClient::ClientMessageType::QUIT:
+        { // - QUIT: remove player from server data base
+            printf("QUIT\n");
+
+            removePlayer(client_player_sock);
+
+            break;
+        }
+        case TankMessageClient::ClientMessageType::HANDLE_INPUT:
+        { // - HANDLE_INPUT: handles input sent by client for next simulation step
+            printf("HANDLE_INPUT\n");
+
+            // TO DO: handle the input like actually fr fr
+            break;
+        }
         }
     }
 }
 
-void TankServer::start() {
-    // while (true) {
-    //     /*
-    //      * NOTA: los clientes están definidos con "smart pointers", es necesario
-    //      * crear un unique_ptr con el objeto socket recibido y usar std::move
-    //      * para añadirlo al vector
-    //      */
-    //     ChatMessage client_message;
-    //     Socket* client_socket = new Socket(socket);
-    //     socket.recv(client_message, client_socket);
+void TankServer::addPlayer(Socket *player_sock)
+{
+    if (player_sock == tank_1 || player_sock == tank_2)
+    {
+        printf("Player already registered.\n");
+        return;
+    }
 
-    //     switch (client_message.type) {
-    //     case ChatMessage::LOGIN: { // - LOGIN: Añadir al vector clients
-    //         printf("LOG IN: ");
-    //         std::cout << client_message.nick << "\n";
-            
-    //         auto message_ptr = std::make_unique<Socket>(*client_socket); client_socket = nullptr;
-    //         clients.push_back(std::move(message_ptr));
+    if (tank_1 != nullptr && tank_2 != nullptr)
+    {
+        printf("Unable to register player, match already full.\n");
+        return;
+    }
 
-    //         break;
-    //     }
-    //     case ChatMessage::LOGOUT: { // - LOGOUT: Eliminar del vector clients
-    //         printf("LOG OUT: ");
-    //         std::cout << client_message.nick << "\n";
+    if (tank_1 == nullptr)
+        tank_1 = player_sock;
+    else
+        tank_2 = player_sock;
+}
 
-    //         auto clients_it = clients.begin();
-    //         while(clients_it != clients.end() && *(*clients_it) != *client_socket) clients_it++;
+void TankServer::removePlayer(Socket *player_sock)
+{
+    // I dont know if i should remove too, for now we just nullptr the reference
+    if (player_sock == tank_1)
+        tank_1 == nullptr;
+    else if (player_sock == tank_2)
+        tank_2 == nullptr;
+    else
+        printf("Player was not registered previously.\n");
+}
 
-    //         if(clients_it != clients.end()) clients.erase(clients_it);
-    //         else std::cout << "Invalid socket: " << client_socket << "\n";
-            
-    //         break;
-    //     }
-    //     case ChatMessage::MESSAGE: { // - MESSAGE: Reenviar el mensaje a todos los clientes (menos el emisor)
-    //         printf("MESSAGE: ");
-    //         std::cout << client_message.nick << " -> " << client_message.message << "\n";
 
-    //         for(auto clients_it = clients.begin(); clients_it != clients.end(); clients_it++)
-    //             if(*(*clients_it) != *client_socket)
-    //                 socket.send(client_message, **clients_it);
-    //         break;
-    //     }
-    //     }
-    // }
+
+void TankServer::run()
+{
+    while(true){
+        // printf("render or something.\n");
+    };
 }

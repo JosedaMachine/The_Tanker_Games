@@ -1,21 +1,16 @@
 #include <unistd.h>
-#include <string.h>
 #include <string>
 #include <cctype>
 
 #include "Serializable.h"
 
-class TankMessageClient: public Serializable
+class TankMessageClient : public Serializable
 {
 public:
-    enum MessageType{
-        LEFT   = 0,
-        RIGHT = 1,
-        DOWN  = 2,
-        UP  = 3,
-        SHOOT  = 4,
-        REGISTER = 5,
-        LOGOUT  = 6
+    enum MessageType {
+        REGISTER = 0,
+        HANDLE_INPUT = 1,
+        QUIT = 2
     };
 
     TankMessageClient() {};

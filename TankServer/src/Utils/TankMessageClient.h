@@ -5,30 +5,37 @@
 
 #include "../Net/Serializable.h"
 
+#define MESSAGE_SIZE sizeof(ClientMessageType) + sizeof(InputType)
+
 class TankMessageClient: public Serializable
 {
 public:
-    enum MessageType{
-        LEFT   = 0,
-        RIGHT = 1,
-        DOWN  = 2,
-        UP  = 3,
-        SHOOT  = 4,
-        REGISTER = 5,
-        LOGOUT  = 6
+    enum ClientMessageType : uint8_t {
+        REGISTER = 0,
+        HANDLE_INPUT = 1,
+        QUIT = 2
+    };
+
+    enum InputType : uint8_t {
+        NONE = 0,
+        LEFT = 1,
+        RIGHT = 2,
+        FRONT = 3,
+        BACK = 4, 
+        SHOOT = 5,
+        PLAY = 6,
+        ESCAPE = 7
     };
 
     TankMessageClient() {};
 
-    TankMessageClient(const std::string& n, const std::string& m) : nick(n), message(m) {};
+    TankMessageClient(const ClientMessageType& t, const InputType& i) : type(t), input(i) {};
 
     void to_bin();
 
     int from_bin(char* bobj);
 
 public:
-    uint8_t type;
-
-    std::string nick;
-    std::string message;
+    ClientMessageType type;
+    InputType input;
 };
