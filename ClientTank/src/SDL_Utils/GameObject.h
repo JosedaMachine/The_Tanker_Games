@@ -5,7 +5,7 @@
 
 #include <SDL2/SDL.h>
 
-#include "Vector2D.h"
+#include "../Utils/Vector2D.h"
 
 class GameObject {
 public:
@@ -25,6 +25,10 @@ public:
 	void render();
 
 	void setTransform(const int x, const int y);
+
+	void setTransform(Vector2D tr);
+
+	void setRotation(const float rot);
 
 	void setDimensions(const int w, const int h);
 

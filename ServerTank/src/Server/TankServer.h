@@ -4,6 +4,8 @@
 
 #include "../Net/Socket.h"
 #include "../Utils/TankMessageClient.h"
+#include "../Utils/TankMessageServer.h"
+
 
 #include "../Utils/Vector2D.h"
 

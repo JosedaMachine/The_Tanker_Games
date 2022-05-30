@@ -6,6 +6,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_timer.h>
 #include <unistd.h>
+#include <iostream>
 #include <string>
 #include <algorithm>
 #include <vector>
@@ -34,8 +35,7 @@ public:
     void sendGameMessage(TankMessageClient::InputType input);
     void sendMatchMessage(TankMessageClient::ClientMessageType msg);
     std::vector<GameObject *>* getGOsReference();
-
-    void updateGOsInfo();
+    void updateGOsInfo(TankMessageServer* msg);
 private:
     std::vector<GameObject *> objs_;
     Socket client_socket;

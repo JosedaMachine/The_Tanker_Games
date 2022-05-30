@@ -65,8 +65,7 @@ void TankServer::run()
         handleInput();
         input_mutex.unlock();
 
-        if (tank_1 != nullptr && tank_2 != nullptr)
-        {
+        if (tank_1 != nullptr && tank_2 != nullptr){
             stepSimulation();
             usleep(TICK_RATE);
         }
@@ -214,8 +213,8 @@ void TankServer::handleInput()
 void TankServer::setup()
 {
     input_t1 = input_t2 = TankMessageClient::InputType::NONE;
-    pos_t1 = Vector2D(50, 50);
-    pos_t2 = Vector2D(200, 200);
+    pos_t1 = Vector2D(200, 360);
+    pos_t2 = Vector2D(800, 360);
     vel_t1 = vel_t2 = Vector2D(0, 0);
     rot_t1 = rot_t2 = 0;
 }
@@ -226,4 +225,8 @@ void TankServer::stepSimulation()
     pos_t2 = pos_t2 + vel_t2;
 
     std::cout << pos_t1 << " " << pos_t2 << "\n";
+
+    TankMessageServer msg(pos_t1, pos_t2, rot_t1, rot_t2);
+    server_socket.send(msg, *tank_1);
+    server_socket.send(msg, *tank_2);
 }

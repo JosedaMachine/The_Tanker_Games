@@ -23,7 +23,7 @@ public:
     inline void setDeacceletarion(float deacceleration){
         deacceleration_ = deacceleration;
     }
-    
+
 private:
     void shoot();
 

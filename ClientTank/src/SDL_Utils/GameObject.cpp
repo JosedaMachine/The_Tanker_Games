@@ -14,6 +14,14 @@ void GameObject::setTransform(const int x, const int y) {
     tr_.set(x, y);
 }
 
+void GameObject::setTransform(Vector2D tr) {
+    tr_.set(tr);
+}
+
+void GameObject::setRotation(const float rot) {
+    rotation = rot;
+}
+
 void GameObject::setDimensions(const int w, const int h) {
     dim_.set(w, h);
 }

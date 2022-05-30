@@ -28,7 +28,7 @@ void App::init(int w, int h) {
 
 	float speed = 2.0f;
 	player_1 = new Tank(this);
-	player_1->setTransform(GameManager().getScenerioLimits().getX() * 0.2, environment().height() / 2);
+	player_1->setTransform(200, environment().height() / 2);
 	player_1->setDimensions(60, 60);
 	player_1->setTexture("./resources/images/tank_blue.png");
 	player_1->setKeys(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_SPACE);
@@ -36,7 +36,7 @@ void App::init(int w, int h) {
 	objs_.push_back(player_1);
 
 	player_2 = new Tank(this);
-	player_2->setTransform(GameManager().getScenerioLimits().getX() * 0.8, environment().height() / 2);
+	player_2->setTransform(800, environment().height() / 2);
 	player_2->setDimensions(60, 60);
 	player_2->setTexture("./resources/images/tank_red.png");
 	player_2->setKeys(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_SPACE);
@@ -60,7 +60,8 @@ void App::netMessage_thread(){
 	TankMessageServer net_message;
     Socket* net_socket = new Socket(client_socket);
     while(true) {
-		//process data from server
+		client_socket.recv(net_message, net_socket);
+		updateGOsInfo(&net_message);
     }
 }
 
@@ -68,8 +69,13 @@ std::vector<GameObject *>* App::getGOsReference(){
 	return &objs_;
 }
 
-void App::updateGOsInfo(){
-	
+void App::updateGOsInfo(TankMessageServer* msg){
+	// //playerOne
+	player_1->setTransform(msg->pos_t1);
+	player_1->setRotation(msg->rot_t1);
+	// //playerTwo
+	player_2->setTransform(msg->pos_t2);
+	player_2->setRotation(msg->rot_t2);
 }
 
 void App::run()
@@ -136,7 +142,6 @@ void App::sendGameMessage(TankMessageClient::InputType input){
 	login.type = TankMessageClient::ClientMessageType::HANDLE_INPUT;
 	login.input = input;
 	client_socket.send(login, client_socket);
-	printf("Sending Game Message...\n");
 }
 
 void App::shutdown()
