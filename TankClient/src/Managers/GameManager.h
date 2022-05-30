@@ -8,9 +8,9 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
-#include "Singleton.h"
-#include "RandomNumberGenerator.h"
-#include "macros.h"
+#include "../Utils/Singleton.h"
+#include "../Utils/RandomNumberGenerator.h"
+#include "../Utils/macros.h"
 
 
 class GameManager: public Singleton<GameManager> {

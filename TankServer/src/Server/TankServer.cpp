@@ -1,5 +1,5 @@
 #include "TankServer.h"
-#include "TankMessage.h"
+#include "../Utils/TankMessageClient.h"
 #include <iostream>
 
 TankServer::TankServer(const char * s, const char * p): server_socket(s, p) {
@@ -18,10 +18,10 @@ void TankServer::searchingPlayers(){
 
 void TankServer::waitForPlayer(Socket* tank){
     while(tank == nullptr){
-        TankMessage receptor;
+        TankMessageClient receptor;
         Socket* player;   
         server_socket.recv(receptor, player);
-        if(receptor.type == TankMessage::MessageType::REGISTER){
+        if(receptor.type == TankMessageClient::MessageType::REGISTER){
             tank = player;
         }
     }

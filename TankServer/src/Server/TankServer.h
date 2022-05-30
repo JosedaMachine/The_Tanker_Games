@@ -6,8 +6,8 @@
 #include <vector>
 #include <memory>
 
-#include "Serializable.h"
-#include "Socket.h"
+#include "../Net/Serializable.h"
+#include "../Net/Socket.h"
 
 #define NICK_SIZE sizeof(char) * 8
 #define MESSAGE_DATA_SIZE sizeof(char) * 80

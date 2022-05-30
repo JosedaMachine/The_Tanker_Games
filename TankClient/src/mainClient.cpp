@@ -1,14 +1,11 @@
 #include <unistd.h>
 #include <iostream>
 
-#include "Game.h"
+#include "./Managers/Game.h"
 
-void start(){
-    // char buffer[256];    
-    // getcwd( buffer, 256 );
-    // printf("%s\n", buffer);
+void start(char **argv){
 
-    Game g;
+    Game g(argv[1], argv[2]);
 
     g.init(1080, 720);
     g.run();
@@ -17,7 +14,11 @@ void start(){
 
 int main(int argc, char *argv[]){
     try {
-        start();
+        if(argc < 3){
+            std::cout << "Usage-> ./Server_TankerGames.out <ip>(0.0.0.0) <port>(2000)\n";
+            return 0;
+        }
+        start(argv);
     }
     catch(const std::string& e)
     {

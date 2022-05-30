@@ -5,7 +5,9 @@
 
 #include <SDL2/SDL.h>
 
-#include "macros.h"
+#include "../Utils/macros.h"
+#include "../Utils/Environment.h"
+#include "../Net/Socket.h"
 
 class GameObject;
 class SDL_Renderer;
@@ -13,7 +15,7 @@ class SDL_Renderer;
 class Game
 {
 public:
-    Game();
+    Game(const char * ip, const char * p);
     virtual ~Game();
 
     void init(int w, int h);
@@ -24,5 +26,6 @@ public:
 
 private:
     std::vector<GameObject *> objs_;
+    // Socket socket_client;
 };
 #endif

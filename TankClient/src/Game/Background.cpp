@@ -1,7 +1,9 @@
 #include "Background.h"
+
+#include "../Managers/GameManager.h"
+#include "../Utils/Environment.h"
+
 #include <iostream>
-#include "GameManager.h"
-#include "Environment.h"
 
 Background::Background() : GameObject(){
     GameManager::instance()->setScenerioLimits(Vector2D(Environment::instance()->width() - 21, Environment::instance()->height() - 66));

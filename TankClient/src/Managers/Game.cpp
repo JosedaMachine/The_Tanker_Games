@@ -5,13 +5,14 @@
 #include <SDL2/SDL_timer.h>
 #include <algorithm>
 
-#include "Environment.h"
-#include "GameObject.h"
-#include "Background.h"
-#include "Tank.h"
+#include "../Game/Background.h"
+#include "../Game/Tank.h"
+#include "../Utils/GameObject.h"
 #include "GameManager.h"
 
-Game::Game() {}
+Game::Game(const char * ip, const char * p){
+	// socket_client(ip, p);
+}
 
 Game::~Game() {}
 

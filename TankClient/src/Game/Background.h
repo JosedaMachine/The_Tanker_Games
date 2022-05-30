@@ -1,7 +1,7 @@
 #ifndef BACKGROUND_H_
 #define BACKGROUND_H_
 
-#include "GameObject.h"
+#include "../Utils/GameObject.h"
 #include <vector>
 
 class Background: public GameObject {

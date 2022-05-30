@@ -2,8 +2,8 @@
 
 #include "Bullet.h"
 
-#include "Environment.h"
-#include "GameManager.h"
+#include "../Utils/Environment.h"
+#include "../Managers/GameManager.h"
 
 Tank::Tank(std::vector<GameObject *>* objs_) : GameObject(), vel_(), speed_(0) , deacceleration_(0.5) {
 	gameObjs_ = objs_;
