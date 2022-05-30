@@ -1,5 +1,6 @@
 #include "TankServer.h"
 #include "TankMessage.h"
+#include <iostream>
 
 TankServer::TankServer(const char * s, const char * p): server_socket(s, p) {
     server_socket.bind();
@@ -8,8 +9,11 @@ TankServer::TankServer(const char * s, const char * p): server_socket(s, p) {
 };
 
 void TankServer::searchingPlayers(){
+    std::cout << "Waiting for players...\n";
     waitForPlayer(tank_1);
+    std::cout << "Player 1 Connected.\n";
     waitForPlayer(tank_2);
+    std::cout << "Player 2 Connected.\n";
 }
 
 void TankServer::waitForPlayer(Socket* tank){

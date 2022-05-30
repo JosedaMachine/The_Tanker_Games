@@ -15,8 +15,7 @@ Game::Game() {}
 
 Game::~Game() {}
 
-void Game::init(int w, int h)
-{
+void Game::init(int w, int h) {
 	Environment::init("The Tanker's Games", w, h);
 	GameManager::init();
 
@@ -27,14 +26,23 @@ void Game::init(int w, int h)
 
 	objs_.push_back(bG);
 
-	Tank* t = new Tank(&objs_);
-	t->setTransform(environment().width() / 2, environment().height() / 2);
-	t->setDimensions(60, 60);
-	t->setTexture("./resources/images/tank_blue.png");
-	t->setKeys(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_SPACE);
-	t->setSpeed(1);
+	float speed = 2.0f;
+	Tank* player_1 = new Tank(&objs_);
+	player_1->setTransform(GameManager().getScenerioLimits().getX() * 0.2, environment().height() / 2);
+	player_1->setDimensions(60, 60);
+	player_1->setTexture("./resources/images/tank_blue.png");
+	player_1->setKeys(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_SPACE);
+	player_1->setSpeed(speed);
+	objs_.push_back(player_1);
 
-	objs_.push_back(t);
+	Tank* player_2 = new Tank(&objs_);
+	player_2->setTransform(GameManager().getScenerioLimits().getX() * 0.8, environment().height() / 2);
+	player_2->setDimensions(60, 60);
+	player_2->setTexture("./resources/images/tank_red.png");
+	player_2->setKeys(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_SPACE);
+	player_2->setSpeed(speed);
+
+	objs_.push_back(player_2);
 }
 
 void Game::run()
