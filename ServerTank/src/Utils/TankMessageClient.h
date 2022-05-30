@@ -5,7 +5,7 @@
 
 #include "../Net/Serializable.h"
 
-#define MESSAGE_SIZE sizeof(ClientMessageType) + sizeof(InputType)
+#define CLIENT_MESSAGE_SIZE sizeof(ClientMessageType) + sizeof(InputType)
 
 class TankMessageClient: public Serializable
 {

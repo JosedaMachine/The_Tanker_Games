@@ -1,8 +1,8 @@
 #include "TankMessageClient.h"
 
 void TankMessageClient::to_bin() {
-    alloc_data(MESSAGE_SIZE);
-    memset(_data, 0, MESSAGE_SIZE);
+    alloc_data(CLIENT_MESSAGE_SIZE);
+    memset(_data, 0, CLIENT_MESSAGE_SIZE);
 
     char *tmp = _data;
 
@@ -15,8 +15,8 @@ void TankMessageClient::to_bin() {
 
 int TankMessageClient::from_bin(char * bobj)
 {
-    alloc_data(MESSAGE_SIZE);
-    memcpy(static_cast<void*>(_data), bobj, MESSAGE_SIZE);
+    alloc_data(CLIENT_MESSAGE_SIZE);
+    memcpy(static_cast<void*>(_data), bobj, CLIENT_MESSAGE_SIZE);
 
     char *tmp = _data;
 
