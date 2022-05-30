@@ -1,6 +1,6 @@
-#include "TankMessageClient.h"
+#include "TankMessageServer.h"
 //REGISTRAR TECLAS Y MANDARLAS PARA QUE EL OTRO CLIENTE LAS PROCESE
-void TankMessageClient::to_bin() {
+void TankMessageServer::to_bin() {
     // alloc_data(MESSAGE_SIZE);
     // memset(_data, 0, MESSAGE_SIZE);
 
@@ -16,7 +16,7 @@ void TankMessageClient::to_bin() {
     // memcpy(tmp, message.c_str(), MESSAGE_DATA_SIZE);
 }
 
-int TankMessageClient::from_bin(char * bobj)
+int TankMessageServer::from_bin(char * bobj)
 {
     // alloc_data(MESSAGE_SIZE);
     // memcpy(static_cast<void*>(_data), bobj, MESSAGE_SIZE);

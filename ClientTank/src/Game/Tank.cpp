@@ -2,7 +2,7 @@
 
 #include "Bullet.h"
 
-#include "../Utils/Environment.h"
+#include "../SDL_Utils/Environment.h"
 #include "../Managers/GameManager.h"
 
 Tank::Tank(std::vector<GameObject *>* objs_) : GameObject(), vel_(), speed_(0) , deacceleration_(0.5) {

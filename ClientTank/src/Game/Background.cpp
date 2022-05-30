@@ -1,7 +1,7 @@
 #include "Background.h"
 
 #include "../Managers/GameManager.h"
-#include "../Utils/Environment.h"
+#include "../SDL_Utils/Environment.h"
 
 #include <iostream>
 

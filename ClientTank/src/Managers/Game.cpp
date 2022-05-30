@@ -1,18 +1,17 @@
 #include "Game.h"
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_timer.h>
-#include <algorithm>
 
 #include "../Game/Background.h"
 #include "../Game/Tank.h"
-#include "../Utils/GameObject.h"
+#include "../Net/Socket.h"
+#include "../SDL_Utils/GameObject.h"
+#include "../SDL_Utils/macros.h"
+#include "../SDL_Utils/Environment.h"
+
 #include "GameManager.h"
 
-Game::Game(const char * ip, const char * p){
-	// socket_client(ip, p);
-}
+Game::Game(const char *s, const char *p) : client_socket(s, p){
+};
 
 Game::~Game() {}
 
@@ -28,7 +27,7 @@ void Game::init(int w, int h) {
 	objs_.push_back(bG);
 
 	float speed = 2.0f;
-	Tank* player_1 = new Tank(&objs_);
+	player_1 = new Tank(&objs_);
 	player_1->setTransform(GameManager().getScenerioLimits().getX() * 0.2, environment().height() / 2);
 	player_1->setDimensions(60, 60);
 	player_1->setTexture("./resources/images/tank_blue.png");
@@ -36,7 +35,7 @@ void Game::init(int w, int h) {
 	player_1->setSpeed(speed);
 	objs_.push_back(player_1);
 
-	Tank* player_2 = new Tank(&objs_);
+	player_2 = new Tank(&objs_);
 	player_2->setTransform(GameManager().getScenerioLimits().getX() * 0.8, environment().height() / 2);
 	player_2->setDimensions(60, 60);
 	player_2->setTexture("./resources/images/tank_red.png");
@@ -44,6 +43,9 @@ void Game::init(int w, int h) {
 	player_2->setSpeed(speed);
 
 	objs_.push_back(player_2);
+
+	sendMatchMessage(TankMessageClient::ClientMessageType::REGISTER);
+	std::cout << "Trying to log...\n";
 }
 
 void Game::run()
@@ -93,6 +95,15 @@ void Game::run()
 		if (frameTime < 20)
 			SDL_Delay(20 - frameTime);
 	}
+
+	sendMatchMessage(TankMessageClient::ClientMessageType::QUIT);
+	std::cout << "Quitting...\n";
+}
+
+void Game::sendMatchMessage(TankMessageClient::ClientMessageType msg){
+	TankMessageClient login;
+	login.type = msg;
+	client_socket.send(login, client_socket);
 }
 
 void Game::shutdown()

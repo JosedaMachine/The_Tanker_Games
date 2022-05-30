@@ -16,7 +16,7 @@ void TankServer::game_thread()
     while (true)
     {
         TankMessageClient client_recv_msg;
-        Socket *client_player_sock;
+        Socket *client_player_sock = new Socket(server_socket);
         server_socket.recv(client_recv_msg, client_player_sock);
 
         switch (client_recv_msg.type)
@@ -24,7 +24,8 @@ void TankServer::game_thread()
         case TankMessageClient::ClientMessageType::REGISTER:
         { // - REGISTER: register player on server data base
             printf("REGISTER\n");
-
+            if(client_player_sock == nullptr)
+                std::cout << "Is NULL\n";
             addPlayer(client_player_sock);
 
             break;
@@ -50,7 +51,7 @@ void TankServer::game_thread()
 
 void TankServer::addPlayer(Socket *player_sock)
 {
-    if (player_sock == tank_1 || player_sock == tank_2)
+    if ((tank_1 && player_sock == tank_1) || (tank_2 && player_sock == tank_2))
     {
         printf("Player already registered.\n");
         return;
@@ -62,19 +63,27 @@ void TankServer::addPlayer(Socket *player_sock)
         return;
     }
 
-    if (tank_1 == nullptr)
+    if (tank_1 == nullptr){
         tank_1 = player_sock;
-    else
+        printf("Player One Ready.\n");
+    }
+    else{
         tank_2 = player_sock;
+        printf("Player Two Ready.\n");
+    }
 }
 
 void TankServer::removePlayer(Socket *player_sock)
 {
     // I dont know if i should remove too, for now we just nullptr the reference
-    if (player_sock == tank_1)
-        tank_1 == nullptr;
-    else if (player_sock == tank_2)
-        tank_2 == nullptr;
+    if (*player_sock == *tank_1){
+        printf("Player One Quit\n");
+        tank_1 = nullptr;
+    }
+    else if (*player_sock == *tank_2){
+        printf("Player Two Quit\n");
+        tank_2 = nullptr;
+    }
     else
         printf("Player was not registered previously.\n");
 }
@@ -84,6 +93,6 @@ void TankServer::removePlayer(Socket *player_sock)
 void TankServer::run()
 {
     while(true){
-        // printf("render or something.\n");
+
     };
 }

@@ -1,5 +1,5 @@
 #include "Bullet.h"
-#include "../Utils/Environment.h"
+#include "../SDL_Utils/Environment.h"
 #include <iostream>
 
 Bullet::Bullet(Vector2D vel) : GameObject(), vel_(vel) {
