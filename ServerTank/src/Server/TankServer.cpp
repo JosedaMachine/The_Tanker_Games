@@ -8,7 +8,7 @@ TankServer::TankServer(const char *s, const char *p) : server_socket(s, p)
 
     tank_1 = tank_2 = nullptr;
 
-    setup();
+    init();
 };
 
 void TankServer::game_thread()
@@ -28,7 +28,9 @@ void TankServer::game_thread()
             if (client_player_sock == nullptr)
                 std::cout << "Is NULL\n";
 
-            addPlayer(client_player_sock);
+            int pl;
+            if (addPlayer(client_player_sock, pl))
+                initPlayer(pl, &client_recv_msg);
 
             break;
         }
@@ -65,37 +67,42 @@ void TankServer::run()
         handleInput();
         input_mutex.unlock();
 
-        if (tank_1 != nullptr && tank_2 != nullptr){
+        if (tank_1 != nullptr && tank_2 != nullptr)
+        {
             stepSimulation();
+            sendMessageClients();
             usleep(TICK_RATE);
         }
     };
 }
 
-void TankServer::addPlayer(Socket *player_sock)
+bool TankServer::addPlayer(Socket *player_sock, int &pl)
 {
     if ((tank_1 && player_sock == tank_1) || (tank_2 && player_sock == tank_2))
     {
         printf("Player already registered.\n");
-        return;
+        return false;
     }
 
     if (tank_1 != nullptr && tank_2 != nullptr)
     {
         printf("Unable to register player, match already full.\n");
-        return;
+        return false;
     }
 
     if (tank_1 == nullptr)
     {
         tank_1 = player_sock;
+        pl = 0;
         printf("Player One Ready.\n");
     }
     else
     {
         tank_2 = player_sock;
+        pl = 1;
         printf("Player Two Ready.\n");
     }
+    return true;
 }
 
 void TankServer::removePlayer(Socket *player_sock)
@@ -113,6 +120,25 @@ void TankServer::removePlayer(Socket *player_sock)
     }
     else
         printf("Player was not registered previously.\n");
+}
+
+void TankServer::initPlayer(const int &pl, const TankMessageClient *msg)
+{
+    win_width = msg->win_width;
+    win_height = msg->win_height;
+
+    if (!pl)
+    {
+        pos_t1 = msg->pos;
+        dim_t1 = msg->dim;
+        rot_t1 = msg->rot;
+    }
+    else
+    {
+        pos_t2 = msg->pos;
+        dim_t2 = msg->dim;
+        rot_t2 = msg->rot;
+    }
 }
 
 void TankServer::saveInput(Socket *player_sock, TankMessageClient::InputType input)
@@ -210,23 +236,34 @@ void TankServer::handleInput()
     input_t1 = input_t2 = TankMessageClient::InputType::NONE;
 };
 
-void TankServer::setup()
+void TankServer::init()
 {
     input_t1 = input_t2 = TankMessageClient::InputType::NONE;
     pos_t1 = Vector2D(200, 360);
     pos_t2 = Vector2D(800, 360);
+    dim_t1 = dim_t2 = Vector2D(0, 0);
     vel_t1 = vel_t2 = Vector2D(0, 0);
     rot_t1 = rot_t2 = 0;
 }
 
 void TankServer::stepSimulation()
 {
-    pos_t1 = pos_t1 + vel_t1;
-    pos_t2 = pos_t2 + vel_t2;
+    if (!outOfBounds(pos_t1 + vel_t1, dim_t1))
+        pos_t1 = pos_t1 + vel_t1;
+    if (!outOfBounds(pos_t2 + vel_t2, dim_t2))
+        pos_t2 = pos_t2 + vel_t2;
 
     std::cout << pos_t1 << " " << pos_t2 << "\n";
+}
 
+void TankServer::sendMessageClients()
+{
     TankMessageServer msg(pos_t1, pos_t2, rot_t1, rot_t2);
     server_socket.send(msg, *tank_1);
     server_socket.send(msg, *tank_2);
+}
+
+bool TankServer::outOfBounds(const Vector2D pos, Vector2D &dim)
+{
+    return pos.getX() < 0 || pos.getY() < 0 || pos.getX() + dim.getX() > win_width || pos.getY() + dim.getY() > win_height;
 }

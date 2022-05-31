@@ -6,7 +6,6 @@
 #include "../Utils/TankMessageClient.h"
 #include "../Utils/TankMessageServer.h"
 
-
 #include "../Utils/Vector2D.h"
 
 #define TICK_RATE 16666 // microseconds
@@ -29,17 +28,25 @@ private:
 
     TankMessageClient::InputType input_t1, input_t2;
 
+    int win_width, win_height;
+
     Vector2D pos_t1, pos_t2;
+    Vector2D dim_t1, dim_t2;
     Vector2D vel_t1, vel_t2;
     float rot_t1, rot_t2;
 
-    void setup();
+    void init();
 
     void saveInput(Socket* player_sock, TankMessageClient::InputType input);
     void handleInput();
 
-    void addPlayer(Socket* player_sock);
+    bool addPlayer(Socket* player_sock, int& pl);
     void removePlayer(Socket* player_sock);
 
+    void initPlayer(const int& pl, const TankMessageClient* msg);
+
     void stepSimulation();
+    void sendMessageClients();
+
+    bool outOfBounds(const Vector2D pos, Vector2D& dim);
 };

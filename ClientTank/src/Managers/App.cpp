@@ -19,6 +19,9 @@ void App::init(int w, int h) {
 	Environment::init("The Tanker's Games", w, h);
 	GameManager::init();
 
+	InitData data; 
+	data.pos = Vector2D(200, environment().height() / 2); data.dim = Vector2D(60, 60); data.rot = 0;
+
 	Background* bG = new Background();
 	bG->setTransform(0, 0);
 	bG->setDimensions(w, h);
@@ -44,7 +47,13 @@ void App::init(int w, int h) {
 
 	objs_.push_back(player_2);
 
-	initConnection();
+	// init connection
+	std::thread([this](){
+		netMessage_thread();
+    }).detach();
+
+	sendMatchMessage(TankMessageClient::ClientMessageType::REGISTER, &data);
+	std::cout << "Trying to log...\n";
 }
 
 void App::initConnection(){
@@ -130,9 +139,13 @@ void App::run()
 	std::cout << "Quitting...\n";
 }
 
-void App::sendMatchMessage(TankMessageClient::ClientMessageType msg){
+void App::sendMatchMessage(TankMessageClient::ClientMessageType msg, InitData* data){
 	TankMessageClient login;
 	login.type = msg;
+	
+	if(data != nullptr)
+		login.setDefaultValues(environment().width(), environment().height(), data->pos, data->dim, data->rot);
+
 	client_socket.send(login, client_socket);
 	printf("Sending Match Message...\n");
 }

@@ -23,7 +23,7 @@ public:
         CREATE_BULLET = 1,
         CREATE_OBSTACLE = 2,
         FRONT = 3,
-        BACK = 4, 
+        BACK = 4,
         SHOOT = 5,
         PLAY = 6,
         ESCAPE = 7
@@ -40,6 +40,6 @@ public:
 
 public:
 
-    Vector2D pos_t1, pos_t2, dim_t1, dim_t2 ;
+    Vector2D pos_t1, pos_t2;
     float rot_t1, rot_t2;
 };

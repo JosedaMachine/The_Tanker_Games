@@ -7,11 +7,28 @@
 
 #include "../Utils/Vector2D.h"
 
-#define SERVER_MESSAGE_SIZE 2 * sizeof(Vector2D) + 2 * sizeof(float)
+#define SERVER_MESSAGE_SIZE 4 * sizeof(Vector2D) + 2 * sizeof(float)
 
 class TankMessageServer: public Serializable
 {
 public:
+    enum ServerMessageType : uint8_t {
+        REGISTER = 0,
+        HANDLE_INPUT = 1,
+        QUIT = 2
+    };
+
+    enum ActionType : uint8_t {
+        NONE = 0,
+        CREATE_BULLET = 1,
+        CREATE_OBSTACLE = 2,
+        FRONT = 3,
+        BACK = 4,
+        SHOOT = 5,
+        PLAY = 6,
+        ESCAPE = 7
+    };
+
     TankMessageServer() {};
 
     TankMessageServer(const Vector2D& p_t1, const Vector2D& p_t2, const float& r_t1, const float& r_t2) 

@@ -5,7 +5,9 @@
 
 #include "../Net/Serializable.h"
 
-#define CLIENT_MESSAGE_SIZE sizeof(ClientMessageType) + sizeof(InputType)
+#include "../Utils/Vector2D.h"
+
+#define CLIENT_MESSAGE_SIZE sizeof(ClientMessageType) + sizeof(InputType) + (2 * sizeof(int)) + sizeof(float) + (2 * sizeof(Vector2D))
 
 class TankMessageClient: public Serializable
 {
@@ -29,7 +31,10 @@ public:
 
     TankMessageClient() {};
 
-    TankMessageClient(const ClientMessageType& t, const InputType& i) : type(t), input(i) {};
+    TankMessageClient(const ClientMessageType& t, const InputType& i)
+        : type(t), input(i), win_width(0), win_height(0), pos(), dim(), rot(0) {};
+
+    void setDefaultValues(const int &w_w, const int &w_h, const Vector2D &p, const Vector2D &d, const float &r);
 
     void to_bin();
 
@@ -37,5 +42,13 @@ public:
 
 public:
     ClientMessageType type;
+
+    // input value for HANDLE_INPUT
     InputType input;
+
+    // initial values for REGISTER message
+    int win_width, win_height;
+
+    Vector2D pos, dim;
+    float rot;
 };

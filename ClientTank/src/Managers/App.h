@@ -17,9 +17,17 @@
 #include "../Utils/TankMessageClient.h"
 #include "../Utils/TankMessageServer.h"
 
+#include "../Utils/Vector2D.h"
+
 class GameObject;
 class SDL_Renderer;
 class Tank;
+
+struct InitData {
+    Vector2D pos;
+    Vector2D dim;
+    float rot;
+};
 
 class App {
 public:
@@ -33,7 +41,7 @@ public:
     void initConnection();
     void netMessage_thread();
     void sendGameMessage(TankMessageClient::InputType input);
-    void sendMatchMessage(TankMessageClient::ClientMessageType msg);
+    void sendMatchMessage(TankMessageClient::ClientMessageType msg, InitData* data = nullptr);
     std::vector<GameObject *>* getGOsReference();
     void updateGOsInfo(TankMessageServer* msg);
 private:
