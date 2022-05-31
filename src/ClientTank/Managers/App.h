@@ -12,17 +12,16 @@
 #include <vector>
 #include <thread>
 
-#include "../Net/Socket.h"
+#include "../../Utils/Socket.h"
 
-#include "../Utils/TankMessageClient.h"
-#include "../Utils/TankMessageServer.h"
+#include "../../Utils/TankMessageClient.h"
+#include "../../Utils/TankMessageServer.h"
 
-#include "../Utils/Vector2D.h"
+#include "../../Utils/Vector2D.h"
 
 class GameObject;
 class SDL_Renderer;
 class Tank;
-class Bullet;
 
 struct InitData {
     Vector2D pos;
@@ -49,6 +48,5 @@ private:
     std::vector<GameObject *> objs_;
     Socket client_socket;
     Tank* player_1, *player_2;
-    Bullet* bullet;
 };
 #endif

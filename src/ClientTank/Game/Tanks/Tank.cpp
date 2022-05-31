@@ -35,7 +35,7 @@ void Tank::handleInput(const SDL_Event &e) {
 
 		if(e.key.keysym.scancode == shoot_){
 			key = TankMessageClient::InputType::SHOOT;
-			// shoot();
+			shoot();
 		}
 		app_->sendGameMessage(key);
 	}

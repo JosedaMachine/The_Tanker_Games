@@ -1,0 +1,6 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/psikerfy/Desktop/The_Tanker_Games'
+make -f client.mk
+make -f server.mk
+make: Leaving directory '/home/psikerfy/Desktop/The_Tanker_Games'
+ 

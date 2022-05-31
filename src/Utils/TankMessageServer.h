@@ -3,9 +3,8 @@
 #include <string>
 #include <cctype>
 
-#include "../Net/Serializable.h"
-
-#include "../Utils/Vector2D.h"
+#include "Serializable.h"
+#include "Vector2D.h"
 
 #define SERVER_MESSAGE_SIZE 3 * sizeof(Vector2D) + 2 * sizeof(float) + sizeof(bool)
 

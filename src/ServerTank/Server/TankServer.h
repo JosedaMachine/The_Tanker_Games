@@ -2,11 +2,11 @@
 #include <string>
 #include <mutex>
 
-#include "../Net/Socket.h"
-#include "../Utils/TankMessageClient.h"
-#include "../Utils/TankMessageServer.h"
+#include "../../Utils/Socket.h"
+#include "../../Utils/TankMessageClient.h"
+#include "../../Utils/TankMessageServer.h"
 
-#include "../Utils/Vector2D.h"
+#include "../../Utils/Vector2D.h"
 
 #define TICK_RATE 16666 // microseconds
 

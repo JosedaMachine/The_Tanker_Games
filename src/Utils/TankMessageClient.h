@@ -3,9 +3,8 @@
 #include <string>
 #include <cctype>
 
-#include "../Net/Serializable.h"
-
-#include "../Utils/Vector2D.h"
+#include "Serializable.h"
+#include "Vector2D.h"
 
 #define CLIENT_MESSAGE_SIZE sizeof(ClientMessageType) + sizeof(InputType) + (2 * sizeof(int)) + sizeof(float) + (2 * sizeof(Vector2D))
 
