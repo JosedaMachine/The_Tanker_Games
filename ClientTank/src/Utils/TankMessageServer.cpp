@@ -16,6 +16,12 @@ void TankMessageServer::to_bin() {
     tmp += sizeof(float);
 
     memcpy(tmp, &rot_t2, sizeof(float));
+    tmp += sizeof(float);
+
+    memcpy(tmp, &shoot, sizeof(bool));
+    tmp += sizeof(bool);
+
+    memcpy(tmp, &pos_b, sizeof(Vector2D));
 }
 
 int TankMessageServer::from_bin(char * bobj)
@@ -35,6 +41,12 @@ int TankMessageServer::from_bin(char * bobj)
     tmp += sizeof(float);
 
     memcpy(&rot_t2, tmp, sizeof(float));
+    tmp += sizeof(float);
+
+    memcpy(&shoot, tmp, sizeof(bool));
+    tmp += sizeof(bool);
+
+    memcpy(&pos_b, tmp, sizeof(Vector2D));
 
     return 0;
 }

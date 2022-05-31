@@ -3,6 +3,7 @@
 
 #include "../Game/Background.h"
 #include "../Game/Tanks/Tank.h"
+#include "../Game/Bullet.h"
 #include "../Net/Socket.h"
 #include "../SDL_Utils/GameObject.h"
 #include "../SDL_Utils/macros.h"
@@ -47,6 +48,8 @@ void App::init(int w, int h) {
 
 	objs_.push_back(player_2);
 
+	bullet = nullptr;
+
 	// init connection
 	std::thread([this](){
 		netMessage_thread();
@@ -85,6 +88,21 @@ void App::updateGOsInfo(TankMessageServer* msg){
 	// //playerTwo
 	player_2->setTransform(msg->pos_t2);
 	player_2->setRotation(msg->rot_t2);
+
+	printf(msg->shoot ? "true" : "false");
+	if(msg->shoot){
+		printf("Hi");
+		if(bullet == nullptr) {
+			bullet = new Bullet(Vector2D(0,0));
+			bullet->setTexture("./resources/images/bullet.png");
+		}
+		bullet->setTransform(100, 100);
+	}
+	else if(bullet != nullptr){
+		printf("Hin't");
+		delete bullet;
+		bullet = nullptr;
+	}
 }
 
 void App::run()
@@ -117,6 +135,10 @@ void App::run()
 			if(o->isEnabled())
 				o->update();
 		}
+		if(bullet != nullptr) {
+			printf("Porfa");
+			bullet->render();
+		}
 
 		refresh();
 
@@ -124,7 +146,7 @@ void App::run()
 
 		// render
 		for (auto &o : objs_){
-			if(o->isEnabled())
+			if(o != nullptr && o->isEnabled())
 				o->render();
 		}
 

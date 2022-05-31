@@ -7,7 +7,7 @@
 
 #include "../Utils/Vector2D.h"
 
-#define SERVER_MESSAGE_SIZE 4 * sizeof(Vector2D) + 2 * sizeof(float)
+#define SERVER_MESSAGE_SIZE 3 * sizeof(Vector2D) + 2 * sizeof(float) + sizeof(bool)
 
 class TankMessageServer: public Serializable
 {
@@ -31,8 +31,8 @@ public:
 
     TankMessageServer() {};
 
-    TankMessageServer(const Vector2D& p_t1, const Vector2D& p_t2, const float& r_t1, const float& r_t2) 
-                : pos_t1(p_t1), pos_t2(p_t2), rot_t1(r_t1), rot_t2(r_t2) {};
+    TankMessageServer(const Vector2D& p_t1, const Vector2D& p_t2, const float& r_t1, const float& r_t2, const bool& s, const Vector2D& p_b) 
+                : pos_t1(p_t1), pos_t2(p_t2), rot_t1(r_t1), rot_t2(r_t2), shoot(s), pos_b(p_b) {};
 
     void to_bin();
 
@@ -42,4 +42,7 @@ public:
 
     Vector2D pos_t1, pos_t2;
     float rot_t1, rot_t2;
+
+    bool shoot;
+    Vector2D pos_b;
 };

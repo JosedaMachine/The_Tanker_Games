@@ -22,6 +22,7 @@
 class GameObject;
 class SDL_Renderer;
 class Tank;
+class Bullet;
 
 struct InitData {
     Vector2D pos;
@@ -48,5 +49,6 @@ private:
     std::vector<GameObject *> objs_;
     Socket client_socket;
     Tank* player_1, *player_2;
+    Bullet* bullet;
 };
 #endif

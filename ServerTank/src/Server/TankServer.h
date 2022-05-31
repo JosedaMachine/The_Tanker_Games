@@ -10,6 +10,8 @@
 
 #define TICK_RATE 16666 // microseconds
 
+#define BULLET_SIZE 10
+
 class TankServer {
 public:
     TankServer(const char * s, const char * p);
@@ -34,6 +36,12 @@ private:
     Vector2D dim_t1, dim_t2;
     Vector2D vel_t1, vel_t2;
     float rot_t1, rot_t2;
+
+    bool shoot;
+
+    Vector2D pos_b;
+    Vector2D vel_b;
+    float rot_b;
 
     void init();
 
