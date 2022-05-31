@@ -49,4 +49,5 @@ private:
     void sendMessageClients();
 
     bool outOfBounds(const Vector2D pos, Vector2D& dim);
+    void checkCollisions();
 };

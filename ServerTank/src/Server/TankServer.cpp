@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "../Utils/Collisions.h"
+
 TankServer::TankServer(const char *s, const char *p) : server_socket(s, p)
 {
     server_socket.bind();
@@ -253,6 +255,8 @@ void TankServer::stepSimulation()
     if (!outOfBounds(pos_t2 + vel_t2, dim_t2))
         pos_t2 = pos_t2 + vel_t2;
 
+    checkCollisions();
+
     std::cout << pos_t1 << " " << pos_t2 << "\n";
 }
 
@@ -265,5 +269,13 @@ void TankServer::sendMessageClients()
 
 bool TankServer::outOfBounds(const Vector2D pos, Vector2D &dim)
 {
-    return pos.getX() < 0 || pos.getY() < 0 || pos.getX() + dim.getX() > win_width || pos.getY() + dim.getY() > win_height;
+    return pos.getX() < 0 || pos.getY() < 0 || 
+           pos.getX() + dim.getX() > win_width || 
+           pos.getY() + dim.getY() > win_height;
+}
+
+void TankServer::checkCollisions() {
+    if(Collisions::collidesWithRotation(pos_t1, dim_t1.getX(), dim_t1.getY(), rot_t1,
+                pos_t2, dim_t2.getX(), dim_t2.getY(), rot_t2))
+                printf("Collision\n");
 }
