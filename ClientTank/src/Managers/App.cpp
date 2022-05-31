@@ -2,7 +2,7 @@
 
 
 #include "../Game/Background.h"
-#include "../Game/Tank.h"
+#include "../Game/Tanks/Tank.h"
 #include "../Net/Socket.h"
 #include "../SDL_Utils/GameObject.h"
 #include "../SDL_Utils/macros.h"

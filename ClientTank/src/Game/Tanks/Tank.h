@@ -1,8 +1,8 @@
 #ifndef TANK_H_
 #define TANK_H_
 
-#include "../SDL_Utils/GameObject.h"
-#include "../Managers/App.h"
+#include "../../SDL_Utils/GameObject.h"
+#include "../../Managers/App.h"
 
 #include <vector>
 

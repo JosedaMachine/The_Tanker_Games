@@ -1,9 +1,9 @@
 #include "Tank.h"
 
-#include "Bullet.h"
+#include "../Bullet.h"
 
-#include "../SDL_Utils/Environment.h"
-#include "../Managers/GameManager.h"
+#include "../../SDL_Utils/Environment.h"
+#include "../../Managers/GameManager.h"
 
 Tank::Tank(App* game) : GameObject(), vel_(), speed_(0) , deacceleration_(0.5) {
 	app_ = game;
