@@ -230,7 +230,7 @@ void App::sendMatchMessage(TankMessageClient::ClientMessageType msg, InitData *d
 	login.type = msg;
 
 	if (data != nullptr)
-		login.setDefaultValues(environment().width(), environment().height(), data->dim, data->rot);
+		login.setDefaultValues(GameManager::instance()->getScenerioLimits().getX(), GameManager::instance()->getScenerioLimits().getY(), data->dim, data->rot);
 
 	client_socket.send(login, client_socket);
 	printf("Sending Match Message...\n");
@@ -294,7 +294,8 @@ void App::playLoad()
 	objs_.push_back(bG);
 
 	float speed = 2.0f;
-	player_1 = new Tank(this);
+	float initialLives = 3;
+	player_1 = new Tank(this, initialLives, 30);
 	player_1->setTransform(200, environment().height() / 2);
 	player_1->setDimensions(TANK_SIZE, TANK_SIZE);
 	player_1->setTexture("./resources/images/tank_blue.png");
@@ -303,7 +304,7 @@ void App::playLoad()
 
 	objs_.push_back(player_1);
 
-	player_2 = new Tank(this);
+	player_2 = new Tank(this, initialLives, 900);
 	player_2->setTransform(800, environment().height() / 2);
 	player_2->setDimensions(TANK_SIZE, TANK_SIZE);
 	player_2->setTexture("./resources/images/tank_red.png");

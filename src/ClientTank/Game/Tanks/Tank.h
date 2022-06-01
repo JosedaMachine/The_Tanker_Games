@@ -8,7 +8,7 @@
 
 class Tank: public GameObject {
 public:
-    Tank(App* game);
+    Tank(App* game, int lives, int initialPosHeart);
     virtual ~Tank();
 
     void handleInput(const SDL_Event &) override;
@@ -28,6 +28,8 @@ public:
         std::cout << "Current Life:" << life_ <<  "\n";
     }
 
+    virtual void render();
+
 private:
     App* app_;
 
@@ -36,9 +38,7 @@ private:
     float deacceleration_;
     float life_; 
 
-
-    std::vector<GameObject *>* gameObjs_;
-
+    std::vector<GameObject*> lives_;
     TankMessageClient::InputType key;
 	SDL_Scancode up_, down_, left_, right_, shoot_;
 };

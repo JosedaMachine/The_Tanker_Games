@@ -2,10 +2,18 @@
 
 #include "../../SDL_Utils/Environment.h"
 #include "../../Managers/GameManager.h"
+#include "Heart.h"
 
-Tank::Tank(App* game) : GameObject(), vel_(), speed_(0) , deacceleration_(0.5) {
+Tank::Tank(App* game, int lives, int initialPosHeart) : GameObject(), vel_(), speed_(0) , deacceleration_(0.5), life_(lives) {
 	app_ = game;
-	gameObjs_ = game->getGOsReference();
+	const int SIZE_HEART = 50;
+	for(int i = 0; i < life_ ; i++){
+		Heart* h = new Heart();
+		h->setTransform(initialPosHeart + i*SIZE_HEART, 10);
+		h->setDimensions(SIZE_HEART, SIZE_HEART);
+		h->setTexture("./resources/images/heart.png");
+		lives_.push_back(h);
+	}
 }
 
 Tank::~Tank() {}
@@ -36,6 +44,14 @@ void Tank::handleInput(const SDL_Event &e) {
 			// shoot();
 		}
 		app_->sendGameMessage(key);
+	}
+}
+
+void Tank::render(){
+	GameObject::render();
+
+	for (size_t i = 0; i < life_; i++){
+		lives_[i]->render();
 	}
 }
 
