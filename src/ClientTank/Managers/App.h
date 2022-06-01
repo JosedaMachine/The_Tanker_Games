@@ -19,6 +19,8 @@
 
 #include "../../Utils/Vector2D.h"
 
+#define TANK_SIZE 90
+
 class GameObject;
 class SDL_Renderer;
 class Tank;
@@ -42,7 +44,7 @@ public:
 
     void sendGameMessage(TankMessageClient::InputType input);
     void sendMatchMessage(TankMessageClient::ClientMessageType msg, InitData* data = nullptr);
-    
+
 private:
     Socket client_socket;
     
@@ -54,11 +56,18 @@ private:
 
     void netMessage_thread();
     
+    void changeState(const TankMessageServer::ServerState s);
+    void loadScreen(const std::string &textFile, const std::string &fontFile, const std::string &text, 
+                const Vector2D &textPos, const Vector2D &textDim, const SDL_Color& color, const int &size);
+    void playLoad();
+
     void refresh();
 
     void shoot(Bullet*& bullet, const Vector2D& pos, const Vector2D& dim);
     void removeBullet(Bullet*& bullet);
     
     void updateGOsInfo(TankMessageServer* msg);
+
+    void clearGameObjects();
 };
 #endif
