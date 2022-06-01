@@ -6,7 +6,7 @@
 #include "Serializable.h"
 #include "Vector2D.h"
 
-#define SERVER_MESSAGE_SIZE sizeof(ServerMessageType) + sizeof(ActionType) + 5 * sizeof(Vector2D) + 2 * sizeof(float) + sizeof(bool) + sizeof(ServerState)
+#define SERVER_MESSAGE_SIZE sizeof(ServerMessageType) + sizeof(ActionType) + 5 * sizeof(Vector2D) + 2 * sizeof(float) + sizeof(bool) + sizeof(ServerState) + sizeof(int)
 
 class TankMessageServer: public Serializable
 {
@@ -30,9 +30,13 @@ public:
         CREATE_BULLET_2 = 3,
         DESTROY_BULLET_1 = 4,
         DESTROY_BULLET_2 = 5,
+        DAMAGE_1 = 6,
+        DAMAGE_2 = 7,
     };
 
     TankMessageServer() {};
+
+    TankMessageServer(int life_) : life(life_) {};
 
     TankMessageServer(const ServerState& s) : state(s) {};
 
@@ -55,6 +59,8 @@ public:
 
     bool shoot;
     Vector2D pos_bullet_1, pos_bullet_2, dim_bullet;
+
+    int life;
 
     ServerState state;
 };

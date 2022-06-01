@@ -45,6 +45,8 @@ private:
     Vector2D dim_b;
     Vector2D vel_b1, vel_b2;
 
+    int lifeT1, lifeT2;
+
     void init();
 
     void saveInput(Socket* player_sock, TankMessageClient::InputType input);

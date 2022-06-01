@@ -12,6 +12,7 @@ TankServer::TankServer(const char *s, const char *p) : server_socket(s, p), dim_
 
     state = TankMessageServer::ServerState::WAITING;
     t1_ready = false; t2_ready= false;
+    lifeT1 = lifeT2 = 3;
 
     init();
 };
@@ -93,7 +94,7 @@ void TankServer::run()
             t1_ready = t2_ready = false;
         }
 
-        if (TankMessageServer::ServerState::PLAYING)
+        if (state == TankMessageServer::ServerState::PLAYING)
         {
             stepSimulation();
             updateInfoClients();
@@ -254,6 +255,7 @@ void TankServer::handleInput()
     {
         vel_t2 = vel_t2 + (Vector2D(0, 1).rotate(rot_t2) * 2.0);
     }
+    break;
     case TankMessageClient::InputType::SHOOT: {
         if(!shoot_t2){
             shoot_t2 = true;
@@ -273,7 +275,7 @@ void TankServer::handleInput()
     case TankMessageClient::InputType::PLAY: {
         t2_ready = true;
     }
-        break;
+    break;
     case TankMessageClient::InputType::NONE:
     default:
     {
@@ -347,6 +349,39 @@ bool TankServer::outOfBounds(const Vector2D pos, Vector2D &dim)
 void TankServer::checkCollisions()
 {
     if (Collisions::collidesWithRotation(pos_t1, dim_t1.getX(), dim_t1.getY(), rot_t1,
-                                         pos_t2, dim_t2.getX(), dim_t2.getY(), rot_t2));
-        // printf("Collision\n");
+                                         pos_t2, dim_t2.getX(), dim_t2.getY(), rot_t2)){
+        pos_t1 = pos_t1 - vel_t1;
+        pos_t2 = pos_t2 - vel_t2;
+        printf("Tanques Colisionan\n");
+    }
+    
+    //Tank 1 With Bullet 2
+    if(shoot_t2 && Collisions::collidesWithRotation(pos_t1, dim_t1.getX(), dim_t1.getY(), rot_t1,
+                                         pos_b2, dim_b.getX(), dim_b.getY(), 0)){
+        printf("Tank1: Ouch\n");
+        shoot_t2 = false;
+        if(lifeT1>0)
+            lifeT1--;
+
+        TankMessageServer msg(lifeT1);
+        msg.type = TankMessageServer::TankMessageServer::ACTION;
+        msg.action_ = TankMessageServer::ActionType::DAMAGE_1;
+        server_socket.send(msg, *tank_1);
+        server_socket.send(msg, *tank_2);
+    }
+
+    //Tank 2 With Bullet 1
+    if(shoot_t1 && Collisions::collidesWithRotation(pos_t2, dim_t2.getX(), dim_t2.getY(), rot_t2,
+                                         pos_b1, dim_b.getX(), dim_b.getY(), 0)){
+        printf("Tank2: Ouch\n");
+        shoot_t1 = false;
+        if(lifeT2>0)
+            lifeT2--;
+        
+        TankMessageServer msg(lifeT2);
+        msg.type = TankMessageServer::TankMessageServer::ACTION;
+        msg.action_ = TankMessageServer::ActionType::DAMAGE_2;
+        server_socket.send(msg, *tank_1);
+        server_socket.send(msg, *tank_2);
+    }
 }

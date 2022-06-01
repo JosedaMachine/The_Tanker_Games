@@ -74,7 +74,7 @@ void App::netMessage_thread(){
 				if(bullet_1 == nullptr){
 									//pos_bullet_1 in this context is used as an auxiliar for the creation of each bullet
 					shoot(bullet_1, server_recv_msg.pos_bullet_1, server_recv_msg.dim_bullet);
-					std::cout << "Bullet created1: " << bullet_1 << "\n";
+					// std::cout << "Bullet created1: " << bullet_1 << "\n";
 				}
 				break;
 			}
@@ -82,29 +82,43 @@ void App::netMessage_thread(){
 				if(bullet_2 == nullptr){
 									//pos_bullet_1 in this context is used as an auxiliar for the creation of each bullet 
 					shoot(bullet_2, server_recv_msg.pos_bullet_1, server_recv_msg.dim_bullet);
-					std::cout << "Bullet created2: " << bullet_2 << "\n";
+					// std::cout << "Bullet created2: " << bullet_2 << "\n";
 				}
 				break;
 			}
 			case TankMessageServer::ActionType::DESTROY_BULLET_1:{
-				if(bullet_1 != nullptr){
-					bullet_1->setEnabled(false);
-					bullet_1 = nullptr;
-				}
+				removeBullet(bullet_1);
 				break;
 			}
 			case TankMessageServer::ActionType::DESTROY_BULLET_2:{
-				if(bullet_2 != nullptr){
-					bullet_2->setEnabled(false);
-					bullet_2 = nullptr;
-				}
+				removeBullet(bullet_2);
 				break;
-			}		
+			}
+			case TankMessageServer::ActionType::DAMAGE_1:{
+				removeBullet(bullet_2);
+				std::cout << "Vida 1:" << server_recv_msg.life << "\n"; 
+				player_1->setLife(server_recv_msg.life);
+				break;
+			}
+			case TankMessageServer::ActionType::DAMAGE_2:{
+				removeBullet(bullet_1);
+				std::cout << "Vida 2:" << server_recv_msg.life << "\n";
+				player_2->setLife(server_recv_msg.life);
+				break;
+			}	
 			}
 			break;
 		}
 		}
     }
+}
+
+//
+void App::removeBullet(Bullet*& bullet){
+	if(bullet != nullptr){
+		bullet->setEnabled(false);
+		bullet = nullptr;
+	}
 }
 
 void App::shoot(Bullet*& bullet, const Vector2D& pos, const Vector2D& dim) {
@@ -162,6 +176,11 @@ void App::run()
 			if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE))
 			{
 				close = true;
+				continue;
+			}
+
+			if ((event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_RETURN)){
+				sendGameMessage(TankMessageClient::InputType::PLAY);
 				continue;
 			}
 

@@ -47,6 +47,8 @@ public:
     void updateGOsInfo(TankMessageServer* msg);
 
     void shoot(Bullet*& bullet, const Vector2D& pos, const Vector2D& dim);
+    void removeBullet(Bullet*& bullet);
+
 private:
     std::vector<GameObject *> objs_;
     Socket client_socket;

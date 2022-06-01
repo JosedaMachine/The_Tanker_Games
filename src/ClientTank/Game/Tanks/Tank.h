@@ -21,6 +21,11 @@ public:
 
     inline void setDeacceletarion(float deacceleration){
         deacceleration_ = deacceleration;
+    }   
+
+    void setLife(int life){
+        life_ = life;
+        std::cout << "Current Life:" << life_ <<  "\n";
     }
 
 private:
@@ -28,7 +33,9 @@ private:
 
     Vector2D vel_;
 	float speed_;
-    float deacceleration_; 
+    float deacceleration_;
+    float life_; 
+
 
     std::vector<GameObject *>* gameObjs_;
 
