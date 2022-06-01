@@ -37,11 +37,11 @@ private:
     Vector2D vel_t1, vel_t2;
     float rot_t1, rot_t2;
 
-    bool shoot;
+    bool shoot_t1, shoot_t2;
 
-    Vector2D pos_b;
+    Vector2D pos_b1, pos_b2;
     Vector2D dim_b;
-    Vector2D vel_b;
+    Vector2D vel_b1, vel_b2;
 
     void init();
 

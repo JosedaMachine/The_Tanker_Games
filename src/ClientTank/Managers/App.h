@@ -46,7 +46,7 @@ public:
     std::vector<GameObject *>* getGOsReference();
     void updateGOsInfo(TankMessageServer* msg);
 
-    void shoot(const Vector2D& pos, const Vector2D& dim);
+    void shoot(Bullet*& bullet, const Vector2D& pos, const Vector2D& dim);
 private:
     std::vector<GameObject *> objs_;
     Socket client_socket;

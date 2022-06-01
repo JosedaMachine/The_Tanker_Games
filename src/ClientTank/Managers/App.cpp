@@ -9,7 +9,7 @@
 
 #include "GameManager.h"
 
-App::App(const char *s, const char *p) : client_socket(s, p), bullet_1(nullptr){
+App::App(const char *s, const char *p) : client_socket(s, p), bullet_1(nullptr),bullet_2(nullptr){
 };
 
 App::~App() {}
@@ -70,17 +70,33 @@ void App::netMessage_thread(){
 		}
 		case TankMessageServer::ServerMessageType::ACTION :{
 			switch (server_recv_msg.action_){
-			case TankMessageServer::ActionType::CREATE_BULLET:{
+			case TankMessageServer::ActionType::CREATE_BULLET_1:{
 				if(bullet_1 == nullptr){
-					shoot(server_recv_msg.pos_bullet, server_recv_msg.dim_bullet);
-					std::cout << "Bullet created\n";
+									//pos_bullet_1 in this context is used as an auxiliar for the creation of each bullet
+					shoot(bullet_1, server_recv_msg.pos_bullet_1, server_recv_msg.dim_bullet);
+					std::cout << "Bullet created1: " << bullet_1 << "\n";
 				}
 				break;
 			}
-			case TankMessageServer::ActionType::DESTROY_BULLET:{
+			case TankMessageServer::ActionType::CREATE_BULLET_2:{
+				if(bullet_2 == nullptr){
+									//pos_bullet_1 in this context is used as an auxiliar for the creation of each bullet 
+					shoot(bullet_2, server_recv_msg.pos_bullet_1, server_recv_msg.dim_bullet);
+					std::cout << "Bullet created2: " << bullet_2 << "\n";
+				}
+				break;
+			}
+			case TankMessageServer::ActionType::DESTROY_BULLET_1:{
 				if(bullet_1 != nullptr){
 					bullet_1->setEnabled(false);
 					bullet_1 = nullptr;
+				}
+				break;
+			}
+			case TankMessageServer::ActionType::DESTROY_BULLET_2:{
+				if(bullet_2 != nullptr){
+					bullet_2->setEnabled(false);
+					bullet_2 = nullptr;
 				}
 				break;
 			}		
@@ -91,12 +107,20 @@ void App::netMessage_thread(){
     }
 }
 
-void App::shoot(const Vector2D& pos, const Vector2D& dim) {
-	bullet_1 = new Bullet();
-	bullet_1->setTransform(pos.getX(), pos.getY());
-	bullet_1->setDimensions(dim.getX(), dim.getY());
-	bullet_1->setTexture("./resources/images/bullet.png");
-	objs_.push_back(bullet_1);
+void App::shoot(Bullet*& bullet, const Vector2D& pos, const Vector2D& dim) {
+	bullet = new Bullet();
+	bullet->setTransform(pos.getX(), pos.getY());
+	bullet->setDimensions(dim.getX(), dim.getY());
+	bullet->setTexture("./resources/images/bullet.png");
+	objs_.push_back(bullet);
+
+
+	if(bullet == bullet_1){
+		std::cout << "Me he creado1\n";
+	}else if(bullet == bullet_1){
+		std::cout << "Me he creado2\n";
+	}
+	else std::cout << "Esto pinta mal\n";
 }
 
 std::vector<GameObject *>* App::getGOsReference(){
@@ -112,8 +136,13 @@ void App::updateGOsInfo(TankMessageServer* msg){
 	player_2->setRotation(msg->rot_t2);
 
 	if(bullet_1){
-		bullet_1->setTransform(msg->pos_bullet);
+		bullet_1->setTransform(msg->pos_bullet_1);
 		std::cout << bullet_1 << ": " << bullet_1->getTransform() << "\n";
+	}
+
+	if(bullet_2){
+		bullet_2->setTransform(msg->pos_bullet_2);
+		std::cout << bullet_2 << ": " << bullet_2->getTransform() << "\n";
 	}
 }
 

@@ -34,7 +34,7 @@ void Environment::initWindow() {
 	assert(renderer_ != nullptr);
 
 	// hide cursor by default
-	hideCursor();
+	// hideCursor();
 }
 
 void Environment::initSDLExtensions() {
@@ -49,8 +49,8 @@ void Environment::initSDLExtensions() {
 
 void Environment::closeWindow() {
 	// destroy renderer and window
-	// SDL_DestroyRenderer(renderer_);
 	SDL_DestroyWindow(window_);
+	SDL_DestroyRenderer(renderer_);
 
 	SDL_Quit(); // quit SDL
 }

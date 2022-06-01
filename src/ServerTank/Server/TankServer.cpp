@@ -21,8 +21,9 @@ void TankServer::init(){
     vel_t1 = vel_t2 = Vector2D(0, 0);
     rot_t1 = rot_t2 = 0;
 
-    shoot = false;
-    pos_b = vel_b = Vector2D(0, 0);
+    shoot_t1 = false;
+    pos_b1 = vel_b1 = Vector2D(0, 0);
+    pos_b2 = vel_b2 = Vector2D(0, 0);
 }
 
 void TankServer::game_thread()
@@ -188,16 +189,16 @@ void TankServer::handleInput()
     }
     break;
     case TankMessageClient::InputType::SHOOT:{
-        if(!shoot){
-            shoot = true;
+        if(!shoot_t1){
+            shoot_t1 = true;
             printf("Shoot 1.\n");
-            pos_b = pos_t1 + Vector2D(dim_t1.getX() / 2.0f, dim_t1.getY() / 2.0f) - Vector2D(0.0f, dim_t1.getY() / 2.0f + 12.0f).rotate(rot_t1) - Vector2D(0, 10.0f);
+            pos_b1 = pos_t1 + Vector2D(dim_t1.getX() / 2.0f, dim_t1.getY() / 2.0f) - Vector2D(0.0f, dim_t1.getY() / 2.0f + 12.0f).rotate(rot_t1) - Vector2D(0, 10.0f);
             
-            vel_b = Vector2D(0, -1).rotate(rot_t1) * 5.0f;
+            vel_b1 = Vector2D(0, -1).rotate(rot_t1) * 5.0f;
 
-            TankMessageServer msg (pos_b, dim_b);
+            TankMessageServer msg (pos_b1, dim_b);
             msg.type = TankMessageServer::TankMessageServer::ACTION;
-            msg.action_ = TankMessageServer::ActionType::CREATE_BULLET;
+            msg.action_ = TankMessageServer::ActionType::CREATE_BULLET_1;
             server_socket.send(msg, *tank_1);
             server_socket.send(msg, *tank_2);
         }
@@ -237,12 +238,20 @@ void TankServer::handleInput()
     {
         vel_t2 = vel_t2 + (Vector2D(0, 1).rotate(rot_t2) * 2.0);
     }
-    case TankMessageClient::InputType::SHOOT:
-    {
-        // printf("Shoot2.\n");
-        // shoot = true;
-        // pos_b = Vector2D(dim_t1.getX() / 2.0f, dim_t1.getY() / 2.0f) - Vector2D(0.0f, dim_t1.getY() / 2.0f + 12.0f).rotate(rot_t2) - Vector2D(0, 10.0f);
-        // vel_b = Vector2D(0, -1).rotate(rot_t2) * 5.0f;
+    case TankMessageClient::InputType::SHOOT: {
+        if(!shoot_t2){
+            shoot_t2 = true;
+            printf("Shoot 2.\n");
+            pos_b2 = pos_t2 + Vector2D(dim_t2.getX() / 2.0f, dim_t2.getY() / 2.0f) - Vector2D(0.0f, dim_t2.getY() / 2.0f + 12.0f).rotate(rot_t2) - Vector2D(0, 10.0f);
+            
+            vel_b2 = Vector2D(0, -1).rotate(rot_t2) * 5.0f;
+
+            TankMessageServer msg (pos_b2, dim_b);
+            msg.type = TankMessageServer::TankMessageServer::ACTION;
+            msg.action_ = TankMessageServer::ActionType::CREATE_BULLET_2;
+            server_socket.send(msg, *tank_1);
+            server_socket.send(msg, *tank_2);
+        }
     }
     break;
     case TankMessageClient::InputType::PLAY:
@@ -269,27 +278,44 @@ void TankServer::stepSimulation()
     if (!outOfBounds(pos_t2 + vel_t2, dim_t2))
         pos_t2 = pos_t2 + vel_t2;
 
-    if (shoot)
+    if (shoot_t1)
     {
-        if (!outOfBounds(pos_b + vel_b, dim_b)){
-            pos_b = pos_b + vel_b;
+        if (!outOfBounds(pos_b1 + vel_b1, dim_b)){
+            pos_b1 = pos_b1 + vel_b1;
         }
         else {
-            shoot = false;
+            shoot_t1 = false;
             
             TankMessageServer msg;
             msg.type = TankMessageServer::TankMessageServer::ACTION;
-            msg.action_ = TankMessageServer::ActionType::DESTROY_BULLET;
+            msg.action_ = TankMessageServer::ActionType::DESTROY_BULLET_1;
             server_socket.send(msg, *tank_1);
             server_socket.send(msg, *tank_2);
         }
     }
+
+    if (shoot_t2)
+    {
+        if (!outOfBounds(pos_b2 + vel_b2, dim_b)){
+            pos_b2 = pos_b2 + vel_b2;
+        }
+        else {
+            shoot_t2 = false;
+            
+            TankMessageServer msg;
+            msg.type = TankMessageServer::TankMessageServer::ACTION;
+            msg.action_ = TankMessageServer::ActionType::DESTROY_BULLET_2;
+            server_socket.send(msg, *tank_1);
+            server_socket.send(msg, *tank_2);
+        }
+    }
+
     checkCollisions();
     // std::cout << pos_t1 << " " << pos_t2 << "\n";
 }
 
 void TankServer::updateInfoClients(){
-    TankMessageServer msg(pos_t1, pos_t2, rot_t1, rot_t2, shoot, pos_b);
+    TankMessageServer msg(pos_t1, pos_t2, rot_t1, rot_t2, shoot_t1, pos_b1, pos_b2);
     msg.type = TankMessageServer::ServerMessageType::UPDATE_INFO;
     server_socket.send(msg, *tank_1);
     server_socket.send(msg, *tank_2);

@@ -1,6 +1,5 @@
 #include "Tank.h"
 
-
 #include "../../SDL_Utils/Environment.h"
 #include "../../Managers/GameManager.h"
 
