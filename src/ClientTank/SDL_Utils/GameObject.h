@@ -26,7 +26,7 @@ public:
 		return enabled_ = e;
 	}
 
-	void render();
+	virtual void render();
 
 	void setTransform(const int x, const int y);
 

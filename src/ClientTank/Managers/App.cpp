@@ -1,11 +1,13 @@
 #include "App.h"
 
-#include "../Game/Background.h"
-#include "../Game/Tanks/Tank.h"
-#include "../Game/Tanks/Bullet.h"
 #include "../SDL_Utils/GameObject.h"
 #include "../SDL_Utils/macros.h"
 #include "../SDL_Utils/Environment.h"
+
+#include "../Game/Font.h"
+#include "../Game/Background.h"
+#include "../Game/Tanks/Tank.h"
+#include "../Game/Tanks/Bullet.h"
 
 #include "GameManager.h"
 
@@ -48,6 +50,12 @@ void App::init(int w, int h) {
 	player_2->setSpeed(speed);
 
 	objs_.push_back(player_2);
+
+	Font* f = new Font("./resources/fonts/Capture_it.ttf", "Prueba", {255, 0, 0}, 30);
+	f->setTransform(20, 600);
+	f->setDimensions(500, 30);
+
+	objs_.push_back(f);
 
 	// init connection
 	std::thread([this](){
