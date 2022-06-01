@@ -30,6 +30,10 @@ Vector2D GameObject::getDimensions() const {
     return dim_;
 }
 
+Vector2D GameObject::getTransform() const {
+    return tr_;
+}
+
 void GameObject::setTexture(const std::string &path) {
     SDL_Surface *surface = IMG_Load(path.c_str());
     if (surface == nullptr)

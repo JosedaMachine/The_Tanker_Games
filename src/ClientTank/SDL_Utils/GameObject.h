@@ -16,15 +16,21 @@ public:
 	virtual ~GameObject();
 
 	virtual void handleInput(const SDL_Event &event) {};
-	virtual void update() = 0;
+	virtual void update() {};
 
 	inline bool isEnabled() const {
 		return enabled_;
 	}
 
+	inline bool setEnabled(bool e) {
+		return enabled_ = e;
+	}
+
 	void render();
 
 	void setTransform(const int x, const int y);
+
+	Vector2D getTransform() const;
 
 	void setTransform(Vector2D tr);
 

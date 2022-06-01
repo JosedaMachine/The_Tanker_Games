@@ -12,7 +12,6 @@ public:
     virtual ~Tank();
 
     void handleInput(const SDL_Event &) override;
-    void update() override;
 
     void setKeys(SDL_Scancode up, SDL_Scancode down, SDL_Scancode left, SDL_Scancode right, SDL_Scancode shoot);
 
@@ -25,8 +24,6 @@ public:
     }
 
 private:
-    void shoot();
-
     App* app_;
 
     Vector2D vel_;

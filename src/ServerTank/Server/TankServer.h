@@ -40,8 +40,8 @@ private:
     bool shoot;
 
     Vector2D pos_b;
+    Vector2D dim_b;
     Vector2D vel_b;
-    float rot_b;
 
     void init();
 
@@ -54,7 +54,7 @@ private:
     void initPlayer(const int& pl, const TankMessageClient* msg);
 
     void stepSimulation();
-    void sendMessageClients();
+    void updateInfoClients();
 
     bool outOfBounds(const Vector2D pos, Vector2D& dim);
     void checkCollisions();

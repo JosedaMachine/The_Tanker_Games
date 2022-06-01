@@ -1,15 +1,15 @@
 #include "App.h"
 
-
 #include "../Game/Background.h"
 #include "../Game/Tanks/Tank.h"
+#include "../Game/Tanks/Bullet.h"
 #include "../SDL_Utils/GameObject.h"
 #include "../SDL_Utils/macros.h"
 #include "../SDL_Utils/Environment.h"
 
 #include "GameManager.h"
 
-App::App(const char *s, const char *p) : client_socket(s, p){
+App::App(const char *s, const char *p) : client_socket(s, p), bullet_1(nullptr){
 };
 
 App::~App() {}
@@ -19,7 +19,8 @@ void App::init(int w, int h) {
 	GameManager::init();
 
 	InitData data; 
-	data.pos = Vector2D(200, environment().height() / 2); data.dim = Vector2D(60, 60); data.rot = 0;
+	data.dim = Vector2D(TANK_SIZE, TANK_SIZE); 
+	data.rot = 0;
 
 	Background* bG = new Background();
 	bG->setTransform(0, 0);
@@ -31,7 +32,7 @@ void App::init(int w, int h) {
 	float speed = 2.0f;
 	player_1 = new Tank(this);
 	player_1->setTransform(200, environment().height() / 2);
-	player_1->setDimensions(60, 60);
+	player_1->setDimensions(TANK_SIZE, TANK_SIZE);
 	player_1->setTexture("./resources/images/tank_blue.png");
 	player_1->setKeys(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_SPACE);
 	player_1->setSpeed(speed);
@@ -39,7 +40,7 @@ void App::init(int w, int h) {
 
 	player_2 = new Tank(this);
 	player_2->setTransform(800, environment().height() / 2);
-	player_2->setDimensions(60, 60);
+	player_2->setDimensions(TANK_SIZE, TANK_SIZE);
 	player_2->setTexture("./resources/images/tank_red.png");
 	player_2->setKeys(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_SPACE);
 	player_2->setSpeed(speed);
@@ -55,22 +56,47 @@ void App::init(int w, int h) {
 	std::cout << "Trying to log...\n";
 }
 
-void App::initConnection(){
-	std::thread([this](){
-		netMessage_thread();
-    }).detach();
-
-	sendMatchMessage(TankMessageClient::ClientMessageType::REGISTER);
-	std::cout << "Trying to log...\n";
-}
-
 void App::netMessage_thread(){
-	TankMessageServer net_message;
+	TankMessageServer server_recv_msg;
     Socket* net_socket = new Socket(client_socket);
     while(true) {
-		client_socket.recv(net_message, net_socket);
-		updateGOsInfo(&net_message);
+		client_socket.recv(server_recv_msg, net_socket);
+
+		switch (server_recv_msg.type)
+        {
+		case TankMessageServer::ServerMessageType::UPDATE_INFO :{
+			updateGOsInfo(&server_recv_msg);
+			break;
+		}
+		case TankMessageServer::ServerMessageType::ACTION :{
+			switch (server_recv_msg.action_){
+			case TankMessageServer::ActionType::CREATE_BULLET:{
+				if(bullet_1 == nullptr){
+					shoot(server_recv_msg.pos_bullet, server_recv_msg.dim_bullet);
+					std::cout << "Bullet created\n";
+				}
+				break;
+			}
+			case TankMessageServer::ActionType::DESTROY_BULLET:{
+				if(bullet_1 != nullptr){
+					bullet_1->setEnabled(false);
+					bullet_1 = nullptr;
+				}
+				break;
+			}		
+			}
+			break;
+		}
+		}
     }
+}
+
+void App::shoot(const Vector2D& pos, const Vector2D& dim) {
+	bullet_1 = new Bullet();
+	bullet_1->setTransform(pos.getX(), pos.getY());
+	bullet_1->setDimensions(dim.getX(), dim.getY());
+	bullet_1->setTexture("./resources/images/bullet.png");
+	objs_.push_back(bullet_1);
 }
 
 std::vector<GameObject *>* App::getGOsReference(){
@@ -84,6 +110,11 @@ void App::updateGOsInfo(TankMessageServer* msg){
 	// //playerTwo
 	player_2->setTransform(msg->pos_t2);
 	player_2->setRotation(msg->rot_t2);
+
+	if(bullet_1){
+		bullet_1->setTransform(msg->pos_bullet);
+		std::cout << bullet_1 << ": " << bullet_1->getTransform() << "\n";
+	}
 }
 
 void App::run()
@@ -143,7 +174,7 @@ void App::sendMatchMessage(TankMessageClient::ClientMessageType msg, InitData* d
 	login.type = msg;
 	
 	if(data != nullptr)
-		login.setDefaultValues(environment().width(), environment().height(), data->pos, data->dim, data->rot);
+		login.setDefaultValues(environment().width(), environment().height(), data->dim, data->rot);
 
 	client_socket.send(login, client_socket);
 	printf("Sending Match Message...\n");

@@ -1,9 +1,9 @@
 #include "TankMessageClient.h"
 
-void TankMessageClient::setDefaultValues(const int &w_w, const int &w_h, const Vector2D &p, const Vector2D &d, const float &r)
+void TankMessageClient::setDefaultValues(const int &w_w, const int &w_h, const Vector2D &d, const float &r)
 {
     win_width = w_w; win_height = w_h;
-    pos = p; dim = d; rot = r;
+    dim = d; rot = r;
 };
 
 void TankMessageClient::to_bin()
@@ -24,9 +24,6 @@ void TankMessageClient::to_bin()
 
     memcpy(tmp, &win_height, sizeof(int));
     tmp += sizeof(int);
-
-    memcpy(tmp, &pos, sizeof(Vector2D));
-    tmp += sizeof(Vector2D);
 
     memcpy(tmp, &dim, sizeof(Vector2D));
     tmp += sizeof(Vector2D);
@@ -52,9 +49,6 @@ int TankMessageClient::from_bin(char *bobj)
 
     memcpy(&win_height, tmp, sizeof(int));
     tmp += sizeof(int);
-
-    memcpy(&pos, tmp, sizeof(Vector2D));
-    tmp += sizeof(Vector2D);
 
     memcpy(&dim, tmp, sizeof(Vector2D));
     tmp += sizeof(Vector2D);

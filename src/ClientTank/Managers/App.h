@@ -19,12 +19,14 @@
 
 #include "../../Utils/Vector2D.h"
 
+#define TANK_SIZE 60
+
 class GameObject;
 class SDL_Renderer;
 class Tank;
+class Bullet;
 
 struct InitData {
-    Vector2D pos;
     Vector2D dim;
     float rot;
 };
@@ -38,15 +40,17 @@ public:
     void run();
     void refresh();
     void shutdown();
-    void initConnection();
     void netMessage_thread();
     void sendGameMessage(TankMessageClient::InputType input);
     void sendMatchMessage(TankMessageClient::ClientMessageType msg, InitData* data = nullptr);
     std::vector<GameObject *>* getGOsReference();
     void updateGOsInfo(TankMessageServer* msg);
+
+    void shoot(const Vector2D& pos, const Vector2D& dim);
 private:
     std::vector<GameObject *> objs_;
     Socket client_socket;
     Tank* player_1, *player_2;
+    Bullet* bullet_1, *bullet_2;
 };
 #endif

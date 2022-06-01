@@ -31,9 +31,9 @@ public:
     TankMessageClient() {};
 
     TankMessageClient(const ClientMessageType& t, const InputType& i)
-        : type(t), input(i), win_width(0), win_height(0), pos(), dim(), rot(0) {};
+        : type(t), input(i), win_width(0), win_height(0), dim(), rot(0) {};
 
-    void setDefaultValues(const int &w_w, const int &w_h, const Vector2D &p, const Vector2D &d, const float &r);
+    void setDefaultValues(const int &w_w, const int &w_h, const Vector2D &d, const float &r);
 
     void to_bin();
 
@@ -48,6 +48,6 @@ public:
     // initial values for REGISTER message
     int win_width, win_height;
 
-    Vector2D pos, dim;
+    Vector2D dim;
     float rot;
 };
