@@ -8,6 +8,7 @@
 #include "../Game/Background.h"
 #include "../Game/Tanks/Tank.h"
 #include "../Game/Tanks/Bullet.h"
+#include "../Game/Obstacle.h"
 
 #include "GameManager.h"
 
@@ -17,7 +18,6 @@ App::~App() {}
 
 void App::init(int w, int h)
 {
-
 	Environment::init("The Tanker's Games", w, h);
 	GameManager::init();
 
@@ -65,8 +65,7 @@ void App::netMessage_thread()
 				}
 				break;
 			}
-			case TankMessageServer::ActionType::CREATE_BULLET_2:
-			{
+			case TankMessageServer::ActionType::CREATE_BULLET_2: {
 				if (bullet_2 == nullptr)
 				{
 					// pos_bullet_1 in this context is used as an auxiliar for the creation of each bullet
@@ -75,13 +74,11 @@ void App::netMessage_thread()
 				}
 				break;
 			}
-			case TankMessageServer::ActionType::DESTROY_BULLET_1:
-			{
+			case TankMessageServer::ActionType::DESTROY_BULLET_1: {
 				removeBullet(bullet_1);
 				break;
 			}
-			case TankMessageServer::ActionType::DESTROY_BULLET_2:
-			{
+			case TankMessageServer::ActionType::DESTROY_BULLET_2: {
 				removeBullet(bullet_2);
 				break;
 			}
@@ -92,11 +89,18 @@ void App::netMessage_thread()
 				player_1->setLife(server_recv_msg.life);
 				break;
 			}
-			case TankMessageServer::ActionType::DAMAGE_2:
-			{
+			case TankMessageServer::ActionType::DAMAGE_2: {
 				removeBullet(bullet_1);
 				std::cout << "Vida 2:" << server_recv_msg.life << "\n";
 				player_2->setLife(server_recv_msg.life);
+				break;
+			}
+			case TankMessageServer::ActionType::CREATE_OBSTACLE: {
+				Obstacle* o = new Obstacle();
+				o->setTransform(server_recv_msg.pos_bullet_1);
+				o->setDimensions(server_recv_msg.dim_bullet.getX(), server_recv_msg.dim_bullet.getY());
+				o->setTexture("./resources/images/obstacle.png");
+				objs_.push_back(o);
 				break;
 			}
 			}
@@ -151,16 +155,10 @@ void App::updateGOsInfo(TankMessageServer *msg)
 	player_2->setRotation(msg->rot_t2);
 
 	if (bullet_1)
-	{
 		bullet_1->setTransform(msg->pos_bullet_1);
-		std::cout << bullet_1 << ": " << bullet_1->getTransform() << "\n";
-	}
 
 	if (bullet_2)
-	{
 		bullet_2->setTransform(msg->pos_bullet_2);
-		std::cout << bullet_2 << ": " << bullet_2->getTransform() << "\n";
-	}
 }
 
 void App::run()

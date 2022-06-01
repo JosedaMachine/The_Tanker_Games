@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <string>
 #include <mutex>
+#include <vector>
 
 #include "../../Utils/Socket.h"
 #include "../../Utils/TankMessageClient.h"
@@ -11,6 +12,11 @@
 #define TICK_RATE 16666 // microseconds
 #define BULLET_SIZE 10
 
+struct Obstacle{
+    Vector2D pos;
+    Vector2D dim;
+};
+
 class TankServer {
 public:
     TankServer(const char * s, const char * p);
@@ -20,7 +26,7 @@ public:
     
     // main game loop
     void run();
-
+    void createObstacles();
 private:
     Socket server_socket;
     Socket* tank_1, *tank_2;
@@ -47,6 +53,8 @@ private:
 
     int lifeT1, lifeT2;
 
+    std::vector<Obstacle> obstacles_;
+
     void init();
 
     void saveInput(Socket* player_sock, TankMessageClient::InputType input);
@@ -61,5 +69,6 @@ private:
     void updateInfoClients();
 
     bool outOfBounds(const Vector2D pos, Vector2D& dim);
+    bool outOfBounds(const Vector2D pos, Vector2D& dim, const Vector2D& limit);
     void checkCollisions();
 };
