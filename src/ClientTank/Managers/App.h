@@ -19,8 +19,6 @@
 
 #include "../../Utils/Vector2D.h"
 
-#define TANK_SIZE 60
-
 class GameObject;
 class SDL_Renderer;
 class Tank;

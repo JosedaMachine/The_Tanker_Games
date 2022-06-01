@@ -4,7 +4,7 @@
 
 #include "../../Utils/Collisions.h"
 
-TankServer::TankServer(const char *s, const char *p) : server_socket(s, p), dim_b(BULLET_SIZE, BULLET_SIZE)
+TankServer::TankServer(const char *s, const char *p) : server_socket(s, p), dim_b(15, 15)
 {
     server_socket.bind();
 

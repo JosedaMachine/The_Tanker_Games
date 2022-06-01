@@ -15,6 +15,8 @@ App::App(const char *s, const char *p) : client_socket(s, p), bullet_1(nullptr),
 App::~App() {}
 
 void App::init(int w, int h) {
+
+	const int TANK_SIZE = 90;
 	Environment::init("The Tanker's Games", w, h);
 	GameManager::init();
 
