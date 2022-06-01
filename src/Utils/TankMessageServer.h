@@ -6,7 +6,7 @@
 #include "Serializable.h"
 #include "Vector2D.h"
 
-#define SERVER_MESSAGE_SIZE sizeof(ServerMessageType) + sizeof(ActionType) + 5 * sizeof(Vector2D) + 2 * sizeof(float) + sizeof(bool)
+#define SERVER_MESSAGE_SIZE sizeof(ServerMessageType) + sizeof(ActionType) + 5 * sizeof(Vector2D) + 2 * sizeof(float) + sizeof(bool) + sizeof(ServerState)
 
 class TankMessageServer: public Serializable
 {
@@ -14,6 +14,13 @@ public:
     enum ServerMessageType : uint8_t {
         UPDATE_INFO = 0,
         ACTION = 1,
+    };
+
+    enum ServerState : uint8_t {
+        WAITING = 0,
+        READY = 1,
+        PLAYING = 2,
+        GAME_OVER = 3
     };
 
     enum ActionType : uint8_t {
@@ -26,6 +33,8 @@ public:
     };
 
     TankMessageServer() {};
+
+    TankMessageServer(const ServerState& s) : state(s) {};
 
     TankMessageServer(const Vector2D& pos_b, const Vector2D& dim_b) : pos_bullet_1(pos_b), dim_bullet(dim_b) {};
 
@@ -46,4 +55,6 @@ public:
 
     bool shoot;
     Vector2D pos_bullet_1, pos_bullet_2, dim_bullet;
+
+    ServerState state;
 };

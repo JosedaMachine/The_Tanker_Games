@@ -34,6 +34,9 @@ void TankMessageServer::to_bin() {
     tmp += sizeof(ServerMessageType);
 
     memcpy(tmp, &action_, sizeof(ActionType));
+    tmp += sizeof(ActionType);
+
+    memcpy(tmp, &state, sizeof(ServerState));
 }
 
 int TankMessageServer::from_bin(char * bobj)
@@ -71,6 +74,9 @@ int TankMessageServer::from_bin(char * bobj)
     tmp += sizeof(ServerMessageType);
 
     memcpy(&action_, tmp, sizeof(ActionType));
+    tmp += sizeof(ActionType);
+
+    memcpy(&state, tmp, sizeof(ServerState));
 
     return 0;
 }

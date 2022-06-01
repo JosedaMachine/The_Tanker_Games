@@ -10,6 +10,9 @@ TankServer::TankServer(const char *s, const char *p) : server_socket(s, p), dim_
 
     tank_1 = tank_2 = nullptr;
 
+    state = TankMessageServer::ServerState::WAITING;
+    t1_ready = false; t2_ready= false;
+
     init();
 };
 
@@ -44,8 +47,12 @@ void TankServer::game_thread()
             int pl;
             if (addPlayer(client_player_sock, pl))
                 initPlayer(pl, &client_recv_msg);
+            
+            if (tank_1 != nullptr && tank_2 != nullptr)
+                state = TankMessageServer::ServerState::READY;
+            else
+                state = TankMessageServer::ServerState::WAITING;
 
-            printf("%d\n", pl);
             break;
         }
         case TankMessageClient::ClientMessageType::QUIT:
@@ -55,10 +62,14 @@ void TankServer::game_thread()
 
             removePlayer(client_player_sock);
 
+            if (tank_1 == nullptr || tank_2 == nullptr)
+                state = TankMessageServer::ServerState::WAITING;
+
             break;
         }
         case TankMessageClient::ClientMessageType::HANDLE_INPUT:
         { // - HANDLE_INPUT: handles input sent by client for next simulation step
+
             input_mutex.lock(); // mutex lock so we don't modify values during run loop (handleInput())
             saveInput(client_player_sock, client_recv_msg.input);
             input_mutex.unlock();
@@ -77,7 +88,12 @@ void TankServer::run()
         handleInput();
         input_mutex.unlock();
 
-        if (tank_1 != nullptr && tank_2 != nullptr)
+        if(state == TankMessageServer::ServerState::READY && t1_ready && t2_ready) {
+            state = TankMessageServer::ServerState::PLAYING;
+            t1_ready = t2_ready = false;
+        }
+
+        if (TankMessageServer::ServerState::PLAYING)
         {
             stepSimulation();
             updateInfoClients();
@@ -88,7 +104,7 @@ void TankServer::run()
 
 bool TankServer::addPlayer(Socket *player_sock, int &pl)
 {
-    if ((tank_1 && player_sock == tank_1) || (tank_2 && player_sock == tank_2))
+    if ((tank_1 && *player_sock == *tank_1) || (tank_2 && *player_sock == *tank_2))
     {
         printf("Player already registered.\n");
         return false;
@@ -204,9 +220,9 @@ void TankServer::handleInput()
         }
     }
     break;
-    case TankMessageClient::InputType::PLAY:
-        break;
-    case TankMessageClient::InputType::ESCAPE:
+    case TankMessageClient::InputType::PLAY: {
+        t1_ready = true;
+    }
         break;
     case TankMessageClient::InputType::NONE:
     default:
@@ -254,9 +270,9 @@ void TankServer::handleInput()
         }
     }
     break;
-    case TankMessageClient::InputType::PLAY:
-        break;
-    case TankMessageClient::InputType::ESCAPE:
+    case TankMessageClient::InputType::PLAY: {
+        t2_ready = true;
+    }
         break;
     case TankMessageClient::InputType::NONE:
     default:

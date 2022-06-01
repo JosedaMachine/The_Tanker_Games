@@ -9,7 +9,6 @@
 #include "../../Utils/Vector2D.h"
 
 #define TICK_RATE 16666 // microseconds
-
 #define BULLET_SIZE 10
 
 class TankServer {
@@ -27,6 +26,9 @@ private:
     Socket* tank_1, *tank_2;
 
     std::mutex input_mutex;
+
+    TankMessageServer::ServerState state;
+    bool t1_ready, t2_ready;
 
     TankMessageClient::InputType input_t1, input_t2;
 
