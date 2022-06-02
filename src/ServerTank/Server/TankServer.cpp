@@ -2,6 +2,8 @@
 #include <time.h>
 #include <iostream>
 
+#include <SDL2/SDL.h>
+
 #include "../../Utils/Collisions.h"
 
 TankServer::TankServer(const char *s, const char *p) : server_socket(s, p), dim_b(15, 15)
@@ -135,9 +137,9 @@ void TankServer::run()
 
         if (state == TankMessageServer::ServerState::READY && t1_ready && t2_ready)
         {
-            std::cout << "Ojo que empieza\n";
             state = TankMessageServer::ServerState::PLAYING;
             t1_ready = t2_ready = false;
+            timer = 0;
             createObstacles();
             sendStateMessage();
         }
@@ -147,6 +149,19 @@ void TankServer::run()
             stepSimulation();
             updateInfoClients();
             usleep(TICK_RATE);
+        }
+
+        Uint32 startTime = SDL_GetTicks();
+        if (state == TankMessageServer::ServerState::GAME_OVER)
+        {
+            Uint32 frameTime = SDL_GetTicks() - startTime;
+            if(timer <= 3500)
+                timer += frameTime;
+            else 
+            {
+                state = TankMessageServer::ServerState::READY;
+                sendStateMessage();
+            }
         }
     };
 }
@@ -217,15 +232,9 @@ void TankServer::initPlayer(const int &pl, const TankMessageClient *msg)
 void TankServer::saveInput(Socket *player_sock, TankMessageClient::InputType input)
 {
     if (*player_sock == *tank_1)
-    {
-        // printf("Input T1.\n");
         input_t1 = input;
-    }
     else if (*player_sock == *tank_2)
-    {
-        // printf("Input T2.\n");
         input_t2 = input;
-    }
     else
         printf("Trying to handle input from a non registered client.\n");
 }
@@ -236,24 +245,16 @@ void TankServer::handleInput()
     switch (input_t1)
     {
     case TankMessageClient::InputType::LEFT:
-    {
         rot_t1 -= 5.0f;
-    }
     break;
     case TankMessageClient::InputType::RIGHT:
-    {
         rot_t1 += 5.0f;
-    }
     break;
     case TankMessageClient::InputType::FRONT:
-    {
         vel_t1 = vel_t1 + (Vector2D(0, -1).rotate(rot_t1) * 3.0);
-    }
     break;
     case TankMessageClient::InputType::BACK:
-    {
         vel_t1 = vel_t1 + (Vector2D(0, 1).rotate(rot_t1) * 2.0);
-    }
     break;
     case TankMessageClient::InputType::SHOOT:
     {
@@ -274,15 +275,11 @@ void TankServer::handleInput()
     }
     break;
     case TankMessageClient::InputType::PLAY:
-    {
         t1_ready = true;
-    }
     break;
     case TankMessageClient::InputType::NONE:
     default:
-    {
         vel_t1 = Vector2D(0, 0);
-    }
     break;
     }
 
@@ -290,19 +287,13 @@ void TankServer::handleInput()
     switch (input_t2)
     {
     case TankMessageClient::InputType::LEFT:
-    {
         rot_t2 -= 5.0f;
-    }
     break;
     case TankMessageClient::InputType::RIGHT:
-    {
         rot_t2 += 5.0f;
-    }
     break;
     case TankMessageClient::InputType::BACK:
-    {
         vel_t2 = vel_t2 + (Vector2D(0, 1).rotate(rot_t2) * 2.0);
-    }
     break;
     case TankMessageClient::InputType::SHOOT:
     {
@@ -323,15 +314,11 @@ void TankServer::handleInput()
     }
     break;
     case TankMessageClient::InputType::PLAY:
-    {
         t2_ready = true;
-    }
     break;
     case TankMessageClient::InputType::NONE:
     default:
-    {
         vel_t2 = Vector2D(0, 0);
-    }
     break;
     }
 
@@ -349,9 +336,7 @@ void TankServer::stepSimulation()
     if (shoot_t1)
     {
         if (!outOfBounds(pos_b1 + vel_b1, dim_b))
-        {
             pos_b1 = pos_b1 + vel_b1;
-        }
         else
         {
             shoot_t1 = false;
@@ -367,9 +352,7 @@ void TankServer::stepSimulation()
     if (shoot_t2)
     {
         if (!outOfBounds(pos_b2 + vel_b2, dim_b))
-        {
             pos_b2 = pos_b2 + vel_b2;
-        }
         else
         {
             shoot_t2 = false;
@@ -383,7 +366,6 @@ void TankServer::stepSimulation()
     }
 
     checkCollisions();
-    // std::cout << pos_t1 << " " << pos_t2 << "\n";
 }
 
 void TankServer::updateInfoClients()

@@ -271,19 +271,19 @@ void TankClient::changeState(const TankMessageServer::ServerState state)
 	switch (state)
 	{
 	case TankMessageServer::ServerState::WAITING:
-		loadScreen("./resources/images/title.png", "./resources/fonts/NES-Chimera.ttf", "Waiting player...",
-				   Vector2D(0, 0), Vector2D(100, 20), {0, 255, 0}, 10);
+		loadScreen("./resources/images/title.png", "./resources/fonts/NES-Chimera.ttf", "Waiting for another player to connect...",
+				   Vector2D(50, 600), Vector2D(1000, 50), {255, 255, 255}, 50);
 		break;
 	case TankMessageServer::ServerState::READY:
 		loadScreen("./resources/images/title.png", "./resources/fonts/NES-Chimera.ttf", "Ready to play, press ENTER",
-				   Vector2D(0, 0), Vector2D(100, 20), {0, 255, 0}, 10);
+				   Vector2D(200, 600), Vector2D(700, 50), {125, 125, 125}, 50);
 		break;
 	case TankMessageServer::ServerState::PLAYING:
 		playLoad();
 		break;
 	case TankMessageServer::ServerState::GAME_OVER:
-		loadScreen("./resources/images/tank_red.png", "./resources/fonts/NES-Chimera.ttf", "gameover",
-				   Vector2D(0, 0), Vector2D(100, 20), {0, 255, 0}, 10);
+		loadScreen("./resources/images/title.png", "./resources/fonts/NES-Chimera.ttf", "Player 'X' Win!",
+				Vector2D(200, 600), Vector2D(700, 50), {125, 125, 125}, 50);
 		break;
 	default:
 		break;

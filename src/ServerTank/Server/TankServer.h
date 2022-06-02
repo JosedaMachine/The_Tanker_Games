@@ -36,6 +36,8 @@ private:
     TankMessageServer::ServerState state;
     bool t1_ready, t2_ready;
 
+    int timer;
+
     TankMessageClient::InputType input_t1, input_t2;
 
     int win_width, win_height;
