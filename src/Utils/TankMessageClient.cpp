@@ -1,4 +1,17 @@
 #include "TankMessageClient.h"
+#include <iostream>
+
+void TankMessageClient::setDefaultValues(const int &w_wL, const int &w_w, const int &w_hT, const int &w_h, const Vector2D &d, const float &r)
+{
+    std::cout << w_wL << "\n";
+    std::cout << w_w << "\n";
+    std::cout << w_hT << "\n";
+    std::cout << w_h << "\n";
+
+    win_widthL = w_wL; win_heightT = w_hT;
+    win_width = w_w; win_height = w_h;
+    dim = d; rot = r;
+};
 
 void TankMessageClient::setDefaultValues(const int &w_w, const int &w_h, const Vector2D &d, const float &r)
 {
@@ -19,7 +32,13 @@ void TankMessageClient::to_bin()
     memcpy(tmp, &input, sizeof(InputType));
     tmp += sizeof(InputType);
 
+    memcpy(tmp, &win_widthL, sizeof(int));
+    tmp += sizeof(int);
+
     memcpy(tmp, &win_width, sizeof(int));
+    tmp += sizeof(int);
+
+    memcpy(tmp, &win_heightT, sizeof(int));
     tmp += sizeof(int);
 
     memcpy(tmp, &win_height, sizeof(int));
@@ -44,7 +63,13 @@ int TankMessageClient::from_bin(char *bobj)
     memcpy(&input, tmp, sizeof(InputType));
     tmp += sizeof(InputType);
 
+    memcpy(&win_widthL, tmp, sizeof(int));
+    tmp += sizeof(int);
+
     memcpy(&win_width, tmp, sizeof(int));
+    tmp += sizeof(int);
+
+    memcpy(&win_heightT, tmp, sizeof(int));
     tmp += sizeof(int);
 
     memcpy(&win_height, tmp, sizeof(int));

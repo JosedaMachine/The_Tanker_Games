@@ -40,7 +40,8 @@ private:
     int timer;
 
     TankMessageClient::InputType input_t1, input_t2;
-
+    
+    int win_widthL, win_heightT;
     int win_width, win_height;
 
     Vector2D pos_t1, pos_t2;
@@ -73,7 +74,7 @@ private:
     void updateInfoClients();
 
     bool outOfBounds(const Vector2D pos, Vector2D& dim);
-    bool outOfBounds(const Vector2D pos, Vector2D& dim, const Vector2D& limit);
+    bool outOfBounds(const Vector2D pos, Vector2D& dim, const Vector2D& limit1, const Vector2D& limit);
     void checkCollisions();
 
     void sendStateMessage();

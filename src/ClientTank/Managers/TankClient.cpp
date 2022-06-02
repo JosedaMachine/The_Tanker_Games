@@ -220,7 +220,11 @@ void TankClient::sendMatchMessage(TankMessageClient::ClientMessageType msg, Init
 	login.type = msg;
 
 	if (data != nullptr)
-		login.setDefaultValues(GameManager::instance()->getScenerioLimits().getX(), GameManager::instance()->getScenerioLimits().getY(), data->dim, data->rot);
+		login.setDefaultValues(GameManager::instance()->getRelativeScenerioLimits().getX(), //Left
+							  GameManager::instance()->getScenerioLimits().getX(), //Right
+							  GameManager::instance()->getRelativeScenerioLimits().getY(),//Top 
+							  GameManager::instance()->getScenerioLimits().getY() + 45, //Bottom
+							  data->dim, data->rot);
 
 	client_socket.send(login, client_socket);
 	printf("Sending Match Message...\n");

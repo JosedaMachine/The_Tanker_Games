@@ -86,17 +86,17 @@ void TankServer::game_thread()
 
 void TankServer::createObstacles()
 {
-    int numberObstacles = 10;
+    int numberObstacles = 13;
 
-    int minX = 0;
+    int minX = win_widthL;
     int maxX = win_width - 200;
 
-    int minY = 0;
+    int minY = win_heightT;
     int maxY = win_height - 200;
 
     int minDim = 50;
     int maxDim = 100;
-    const int threshold_dim = 20;
+    const int threshold_dim = 50;
     for (size_t i = 0; i < numberObstacles; i++)
     {
         int auxDim = (maxDim - minDim) * ((float)rand() / RAND_MAX) + minDim;
@@ -108,7 +108,7 @@ void TankServer::createObstacles()
                                                 pos, dim.getX() + threshold_dim, dim.getY() + threshold_dim, 0) || // Mientras se solape con el tanque 1
                Collisions::collidesWithRotation(pos_t2, dim_t2.getX(), dim_t2.getY(), rot_t2,
                                                 pos, dim.getX() + threshold_dim, dim.getY() + threshold_dim, 0) || // O con el tanque 2
-               outOfBounds(pos, dim, Vector2D(maxX, maxY)))                                                        // O se salga de la pantalla
+               outOfBounds(pos, dim, Vector2D(minX, minY), Vector2D(maxX, maxY)))                                                        // O se salga de la pantalla
             // Buscamos nuevas posiciones
             pos = Vector2D((maxX - minX) * ((float)rand() / RAND_MAX) + minX, (maxY - minY) * ((float)rand() / RAND_MAX) + minY);
 
@@ -213,8 +213,10 @@ void TankServer::removePlayer(Socket *player_sock)
 
 void TankServer::initPlayer(const int &pl, const TankMessageClient *msg)
 {
+    win_widthL = msg->win_widthL;
     win_width = msg->win_width;
     win_height = msg->win_height;
+    win_heightT = msg->win_heightT;
 
     if (!pl)
     {
@@ -290,6 +292,9 @@ void TankServer::handleInput()
     break;
     case TankMessageClient::InputType::RIGHT:
         rot_t2 += 5.0f;
+    break;
+    case TankMessageClient::InputType::FRONT:
+        vel_t2 = vel_t2 + (Vector2D(0, -1).rotate(rot_t2) * 3.0);
     break;
     case TankMessageClient::InputType::BACK:
         vel_t2 = vel_t2 + (Vector2D(0, 1).rotate(rot_t2) * 2.0);
@@ -377,14 +382,14 @@ void TankServer::updateInfoClients()
 
 bool TankServer::outOfBounds(const Vector2D pos, Vector2D &dim)
 {
-    return pos.getX() < 0 || pos.getY() < 0 ||
+    return pos.getX() < win_widthL || pos.getY() < win_heightT ||
            pos.getX() + dim.getX() > win_width ||
            pos.getY() + dim.getY() > win_height;
 }
 
-bool TankServer::outOfBounds(const Vector2D pos, Vector2D &dim, const Vector2D &limit)
+bool TankServer::outOfBounds(const Vector2D pos, Vector2D &dim, const Vector2D& limit1,  const Vector2D &limit)
 {
-    return pos.getX() < 0 || pos.getY() < 0 ||
+    return pos.getX() < limit1.getX() || pos.getY() < limit1.getY() ||
            pos.getX() + dim.getX() > limit.getX() ||
            pos.getY() + dim.getY() > limit.getY();
 }
