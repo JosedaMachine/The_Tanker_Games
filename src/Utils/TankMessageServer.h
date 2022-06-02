@@ -12,15 +12,18 @@ class TankMessageServer: public Serializable
 {
 public:
     enum ServerMessageType : uint8_t {
-        UPDATE_INFO = 0,
-        ACTION = 1,
+        UPDATE_STATE = 0,
+        UPDATE_INFO = 1,
+        ACTION = 2
     };
 
     enum ServerState : uint8_t {
         WAITING = 0,
         READY = 1,
         PLAYING = 2,
-        GAME_OVER = 3
+        GAME_OVER = 3,
+        SERVER_QUIT = 4,
+        EMPTY = 5
     };
 
     enum ActionType : uint8_t {
@@ -38,7 +41,7 @@ public:
 
     TankMessageServer(int life_) : life(life_) {};
 
-    TankMessageServer(const ServerState& s) : state(s) {};
+    TankMessageServer(const ServerState s) : state(s) {};
 
     TankMessageServer(const Vector2D& pos_b, const Vector2D& dim_b) : pos_bullet_1(pos_b), dim_bullet(dim_b) {};
 

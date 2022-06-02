@@ -71,4 +71,6 @@ private:
     bool outOfBounds(const Vector2D pos, Vector2D& dim);
     bool outOfBounds(const Vector2D pos, Vector2D& dim, const Vector2D& limit);
     void checkCollisions();
+
+    void sendStateMessage();
 };

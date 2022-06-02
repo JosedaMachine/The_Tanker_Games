@@ -1,11 +1,11 @@
 #include <unistd.h>
 #include <iostream>
 
-#include "./Managers/App.h"
+#include "./Managers/ClientServer.h"
 
 void start(char **argv){
 
-    App g(argv[1], argv[2]);
+    ClientServer g(argv[1], argv[2]);
 
     g.init(1080, 720);
     g.run();
