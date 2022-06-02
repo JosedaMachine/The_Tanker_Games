@@ -4,7 +4,7 @@
 #include "../../Managers/GameManager.h"
 #include "Heart.h"
 
-Tank::Tank(ClientServer* game, int lives, int initialPosHeart) : GameObject(), vel_(), speed_(0) , deacceleration_(0.5), life_(lives) {
+Tank::Tank(TankClient* game, int lives, int initialPosHeart) : GameObject(), vel_(), speed_(0) , deacceleration_(0.5), life_(lives) {
 	app_ = game;
 	const int SIZE_HEART = 50;
 	for(int i = 0; i < life_ ; i++){

@@ -1,4 +1,4 @@
-#include "ClientServer.h"
+#include "TankClient.h"
 
 #include "../SDL_Utils/GameObject.h"
 #include "../SDL_Utils/macros.h"
@@ -12,12 +12,12 @@
 
 #include "GameManager.h"
 
-ClientServer::ClientServer(const char *s, const char *p) : client_socket(s, p), player_1(nullptr), player_2(nullptr), bullet_1(nullptr), bullet_2(nullptr),
+TankClient::TankClient(const char *s, const char *p) : client_socket(s, p), player_1(nullptr), player_2(nullptr), bullet_1(nullptr), bullet_2(nullptr),
 														   currentState(TankMessageServer::ServerState::WAITING), nextState(TankMessageServer::ServerState::EMPTY){};
 
-ClientServer::~ClientServer() {}
+TankClient::~TankClient() {}
 
-void ClientServer::init(int w, int h)
+void TankClient::init(int w, int h)
 {
 	Environment::init("The Tanker's Games", w, h);
 	GameManager::init();
@@ -37,20 +37,25 @@ void ClientServer::init(int w, int h)
 	std::cout << "Trying to log...\n";
 }
 
-void ClientServer::net_message_thread()
+void TankClient::net_message_thread()
 {
 	TankMessageServer server_recv_msg;
 	Socket *net_socket = new Socket(client_socket);
 	while (true)
 	{
+		std::cout << "Im about to recevie someth\n";
 		client_socket.recv(server_recv_msg, net_socket);
+
+		std::cout << "Message: " << server_recv_msg.type << "\n";
 
 		switch (server_recv_msg.type)
 		{
-		// case TankMessageServer::ServerMessageType::UPDATE_STATE:
-		// 	printf("HI");
-		// 	// printf("%d", server_recv_msg.state);
-		// 	break;
+		case TankMessageServer::ServerMessageType::UPDATE_STATE:{
+			nextState = server_recv_msg.state;
+			std::cout << "Cambio de estado:" << nextState << "\n";
+			// printf("%d", server_recv_msg.state);
+			break;
+		}
 		case TankMessageServer::ServerMessageType::UPDATE_INFO:
 		{
 			updateGOsInfo(&server_recv_msg);
@@ -70,7 +75,8 @@ void ClientServer::net_message_thread()
 				}
 				break;
 			}
-			case TankMessageServer::ActionType::CREATE_BULLET_2: {
+			case TankMessageServer::ActionType::CREATE_BULLET_2: 
+			{
 				if (bullet_2 == nullptr)
 				{
 					// pos_bullet_1 in this context is used as an auxiliar for the creation of each bullet
@@ -79,11 +85,13 @@ void ClientServer::net_message_thread()
 				}
 				break;
 			}
-			case TankMessageServer::ActionType::DESTROY_BULLET_1: {
+			case TankMessageServer::ActionType::DESTROY_BULLET_1: 
+			{
 				removeBullet(bullet_1);
 				break;
 			}
-			case TankMessageServer::ActionType::DESTROY_BULLET_2: {
+			case TankMessageServer::ActionType::DESTROY_BULLET_2: 
+			{
 				removeBullet(bullet_2);
 				break;
 			}
@@ -94,13 +102,15 @@ void ClientServer::net_message_thread()
 				player_1->setLife(server_recv_msg.life);
 				break;
 			}
-			case TankMessageServer::ActionType::DAMAGE_2: {
+			case TankMessageServer::ActionType::DAMAGE_2: 
+			{
 				removeBullet(bullet_1);
 				std::cout << "Vida 2:" << server_recv_msg.life << "\n";
 				player_2->setLife(server_recv_msg.life);
 				break;
 			}
-			case TankMessageServer::ActionType::CREATE_OBSTACLE: {
+			case TankMessageServer::ActionType::CREATE_OBSTACLE: 
+			{
 				Obstacle* o = new Obstacle();
 				o->setTransform(server_recv_msg.pos_bullet_1);
 				o->setDimensions(server_recv_msg.dim_bullet.getX(), server_recv_msg.dim_bullet.getY());
@@ -115,74 +125,88 @@ void ClientServer::net_message_thread()
 	}
 }
 
-void ClientServer::removeBullet(Bullet *&bullet)
-{
-	if (bullet != nullptr)
-	{
+void TankClient::removeBullet(Bullet *&bullet) {
+	if (bullet != nullptr) {
 		bullet->setEnabled(false);
 		bullet = nullptr;
 	}
 }
 
-void ClientServer::shoot(Bullet *&bullet, const Vector2D &pos, const Vector2D &dim)
-{
+void TankClient::shoot(Bullet *&bullet, const Vector2D &pos, const Vector2D &dim) {
 	bullet = new Bullet();
 	bullet->setTransform(pos.getX(), pos.getY());
 	bullet->setDimensions(dim.getX(), dim.getY());
 	bullet->setTexture("./resources/images/bullet.png");
 	objs_.push_back(bullet);
 
-	if (bullet == bullet_1)
-		std::cout << "Me he creado1\n";
-	else if (bullet == bullet_1)
-		std::cout << "Me he creado2\n";
-	else
-		std::cout << "Esto pinta mal\n";
+	// if (bullet == bullet_1)
+	// 	std::cout << "Me he creado1\n";
+	// else if (bullet == bullet_2)
+	// 	std::cout << "Me he creado2\n";
+	// else
+	// 	std::cout << "Esto pinta mal\n";
 }
 
-void ClientServer::updateGOsInfo(TankMessageServer *msg)
+void TankClient::updateGOsInfo(TankMessageServer *msg)
 {
-	// //playerOne
-	player_1->setTransform(msg->pos_t1);
-	player_1->setRotation(msg->rot_t1);
-	// //playerTwo
-	player_2->setTransform(msg->pos_t2);
-	player_2->setRotation(msg->rot_t2);
+	if(currentState == TankMessageServer::ServerState::PLAYING){
+		// //playerOne
+		player_1->setTransform(msg->pos_t1);
+		player_1->setRotation(msg->rot_t1);
+		// //playerTwo
+		player_2->setTransform(msg->pos_t2);
+		player_2->setRotation(msg->rot_t2);
 
-	if (bullet_1)
-		bullet_1->setTransform(msg->pos_bullet_1);
+		if (bullet_1)
+			bullet_1->setTransform(msg->pos_bullet_1);
 
-	if (bullet_2)
-		bullet_2->setTransform(msg->pos_bullet_2);
+		if (bullet_2)
+			bullet_2->setTransform(msg->pos_bullet_2);
+	}
 }
 
-void ClientServer::run()
+void TankClient::run()
 {
 	SDL_Event event;
 
 	// animation loop
 	while (nextState != TankMessageServer::ServerState::SERVER_QUIT)
 	{
+		if(currentState == 2){
+			std::cout << "Relajado _1\n";
+		}
+		if(currentState == 1){
+					std::cout << "INICIANDO\n";
+		}
+
 		checkState();
 
 		Uint32 startTime = environment().currRealTime();
 		while (SDL_PollEvent(&event))
 		{
-			if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE))
-			{
+			//Salir del server
+			if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)) {
 				currentState = TankMessageServer::ServerState::SERVER_QUIT;
 				continue;
 			}
 
-			if ((event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_RETURN))
-			{
+			if ((event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_RETURN)) {
+				std::cout << "Lets Begin\n";
 				sendGameMessage(TankMessageClient::InputType::PLAY);
 				continue;
 			}
 
-			for (auto &o : objs_)
+			for (auto &o : objs_){
 				if (o->isEnabled())
 					o->handleInput(event);
+				if(currentState == 1){
+					std::cout << "Input\n";
+				}
+
+				if(currentState == 2){
+					std::cout << "Relajado _2\n";
+				}
+			}
 		}
 
 		if (currentState == TankMessageServer::ServerState::SERVER_QUIT)
@@ -198,23 +222,47 @@ void ClientServer::run()
 		environment().clearRenderer();
 
 		// render
-		for (auto &o : objs_)
+		for (auto &o : objs_){
+			if(currentState == 1){
+					std::cout << "Renderizando\n";
+			}
+
+			if(currentState == 2){
+					std::cout << "Relajado _3\n";
+			}
 			if (o->isEnabled())
 				o->render();
+		}
+
+		if(currentState == 1){
+			std::cout << "A Presentar\n";
+		}
 
 		environment().presentRenderer();
+
+		if(currentState == 1){
+			std::cout << "Presentado\n";
+		}
 
 		Uint32 frameTime = environment().currRealTime() - startTime;
 		if (frameTime < 20)
 			SDL_Delay(20 - frameTime);
+
+		if(currentState == 1){
+			std::cout << "=================\n";
+		}
 	}
 
 	sendMatchMessage(TankMessageClient::ClientMessageType::QUIT);
 	std::cout << "Quitting...\n";
 }
 
-void ClientServer::sendMatchMessage(TankMessageClient::ClientMessageType msg, InitData *data)
-{
+void TankClient::sendMatchMessage(TankMessageClient::ClientMessageType msg, InitData *data)
+{	
+	if(currentState == 1){
+		std::cout << "Mandando Mensaje\n";
+	}
+
 	TankMessageClient login;
 	login.type = msg;
 
@@ -225,7 +273,7 @@ void ClientServer::sendMatchMessage(TankMessageClient::ClientMessageType msg, In
 	printf("Sending Match Message...\n");
 }
 
-void ClientServer::sendGameMessage(TankMessageClient::InputType input)
+void TankClient::sendGameMessage(TankMessageClient::InputType input)
 {
 	TankMessageClient login;
 	login.type = TankMessageClient::ClientMessageType::HANDLE_INPUT;
@@ -233,32 +281,43 @@ void ClientServer::sendGameMessage(TankMessageClient::InputType input)
 	client_socket.send(login, client_socket);
 }
 
-void ClientServer::checkState()
+void TankClient::checkState()
 {
+	if(currentState == 2){
+		std::cout << "Relajado _4\n";
+	}
+
+	if(currentState == 1){
+		std::cout << "Check Estado\n";
+	}
+
 	if (nextState != TankMessageServer::ServerState::EMPTY && currentState != nextState)
 	{
+		changeState(nextState);
 		currentState = nextState;
 		nextState = TankMessageServer::ServerState::EMPTY;
-		printf("CS: %d -- NS: %d", (int)currentState, (int)nextState);
-		// changeState(currentState);
+		printf("Curr St: %d -- Next St: %d \n", (int)currentState, (int)nextState);
 	}
 }
 
-void ClientServer::changeState(const TankMessageServer::ServerState s)
+void TankClient::changeState(const TankMessageServer::ServerState s)
 {
 	clearGameObjects();
 
 	switch (s)
 	{
 	case TankMessageServer::ServerState::WAITING:
+		std::cout << "Espero\n";
 		loadScreen("./resources/images/tank_blue.png", "./resources/fonts/NES-Chimera.ttf", "waitin",
 				   Vector2D(0, 0), Vector2D(100, 20), {0, 255, 0}, 10);
 		break;
 	case TankMessageServer::ServerState::READY:
+		std::cout << "Listo\n";
 		loadScreen("./resources/images/tank_red.png", "./resources/fonts/NES-Chimera.ttf", "ready",
 				   Vector2D(0, 0), Vector2D(100, 20), {0, 255, 0}, 10);
 		break;
 	case TankMessageServer::ServerState::PLAYING:
+		std::cout << "Amo a Jugah\n";
 		playLoad();
 		break;
 	case TankMessageServer::ServerState::GAME_OVER:
@@ -270,7 +329,7 @@ void ClientServer::changeState(const TankMessageServer::ServerState s)
 	}
 }
 
-void ClientServer::loadScreen(const std::string &textFile, const std::string &fontFile, const std::string &text,
+void TankClient::loadScreen(const std::string &textFile, const std::string &fontFile, const std::string &text,
 							  const Vector2D &textPos, const Vector2D &textDim, const SDL_Color &color, const int &size)
 {
 	Background *bG = new Background();
@@ -287,7 +346,7 @@ void ClientServer::loadScreen(const std::string &textFile, const std::string &fo
 	objs_.push_back(f);
 }
 
-void ClientServer::playLoad()
+void TankClient::playLoad()
 {
 	Background *bG = new Background();
 	bG->setTransform(0, 0);
@@ -323,12 +382,12 @@ void ClientServer::playLoad()
 	objs_.push_back(f);
 }
 
-void ClientServer::shutdown()
+void TankClient::shutdown()
 {
 	clearGameObjects();
 }
 
-void ClientServer::refresh()
+void TankClient::refresh()
 {
 	objs_.erase(std::remove_if(objs_.begin(), objs_.end(),
 							   [](const GameObject *e)
@@ -344,8 +403,11 @@ void ClientServer::refresh()
 				objs_.end());
 }
 
-void ClientServer::clearGameObjects()
+void TankClient::clearGameObjects()
 {
-	for (unsigned int i = 0; i < objs_.size(); i++)
+	for (unsigned int i = 0; i < objs_.size(); i++){
 		delete objs_[i];
+		objs_[i] = nullptr;
+	}
+	objs_.clear();
 }

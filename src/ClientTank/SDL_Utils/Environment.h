@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <iostream>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -45,6 +46,8 @@ public:
 
 	// present the current content of the renderer
 	inline void presentRenderer() {
+		// std::cout << "SDL Presenting:\n";
+		// std::cout << renderer_ <<   "\n";
 		SDL_RenderPresent(renderer_);
 	}
 

@@ -1,11 +1,11 @@
 #include <unistd.h>
 #include <iostream>
 
-#include "./Managers/ClientServer.h"
+#include "./Managers/TankClient.h"
 
 void start(char **argv){
 
-    ClientServer g(argv[1], argv[2]);
+    TankClient g(argv[1], argv[2]);
 
     g.init(1080, 720);
     g.run();

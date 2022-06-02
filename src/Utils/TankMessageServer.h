@@ -23,7 +23,7 @@ public:
         PLAYING = 2,
         GAME_OVER = 3,
         SERVER_QUIT = 4,
-        EMPTY = 5
+        EMPTY = 6
     };
 
     enum ActionType : uint8_t {

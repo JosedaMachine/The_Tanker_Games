@@ -2,13 +2,13 @@
 #define TANK_H_
 
 #include "../../SDL_Utils/GameObject.h"
-#include "../../Managers/ClientServer.h"
+#include "../../Managers/TankClient.h"
 
 #include <vector>
 
 class Tank: public GameObject {
 public:
-    Tank(ClientServer* game, int lives, int initialPosHeart);
+    Tank(TankClient* game, int lives, int initialPosHeart);
     virtual ~Tank();
 
     void handleInput(const SDL_Event &) override;
@@ -31,7 +31,7 @@ public:
     virtual void render();
 
 private:
-    ClientServer* app_;
+    TankClient* app_;
 
     Vector2D vel_;
 	float speed_;

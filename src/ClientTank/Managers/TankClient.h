@@ -1,5 +1,5 @@
-#ifndef GAME_H_
-#define GAME_H_
+#ifndef TANKCLIENT_H_
+#define TANKCLIENT_H_
 
 #include <unistd.h>
 #include <iostream>
@@ -32,11 +32,11 @@ struct InitData
     float rot;
 };
 
-class ClientServer
+class TankClient
 {
 public:
-    ClientServer(const char *s, const char *p);
-    virtual ~ClientServer();
+    TankClient(const char *s, const char *p);
+    virtual ~TankClient();
 
     void init(int w, int h);
     void run();

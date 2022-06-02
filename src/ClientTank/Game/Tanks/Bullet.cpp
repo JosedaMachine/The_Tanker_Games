@@ -5,5 +5,5 @@ Bullet::Bullet() : GameObject() {
 }
 
 Bullet::~Bullet() {
-        std::cout << "Borrada\n";
+        std::cout << "Bala Borrada\n";
 }

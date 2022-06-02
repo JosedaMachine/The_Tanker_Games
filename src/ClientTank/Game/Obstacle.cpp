@@ -5,5 +5,5 @@ Obstacle::Obstacle() : GameObject() {
 }
 
 Obstacle::~Obstacle() {
-        std::cout << "Borrada\n";
+        std::cout << "Obstaculo borrado\n";
 }
