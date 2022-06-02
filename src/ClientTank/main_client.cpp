@@ -7,7 +7,7 @@ void start(char **argv){
 
     TankClient g(argv[1], argv[2]);
 
-    g.init(1080, 720);
+    g.init(1280, 720);
     g.run();
     g.shutdown();
 }

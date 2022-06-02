@@ -11,6 +11,7 @@
 
 #define TICK_RATE 16666 // microseconds
 #define BULLET_SIZE 10
+#define GAME_OVER_TIME 3500
 
 struct Obstacle {
     Vector2D pos;
@@ -27,6 +28,7 @@ public:
     // main game loop
     void run();
     void createObstacles();
+
 private:
     Socket server_socket;
     Socket* tank_1, *tank_2;

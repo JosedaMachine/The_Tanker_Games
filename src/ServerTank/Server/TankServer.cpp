@@ -1,7 +1,7 @@
 #include "TankServer.h"
 #include <time.h>
 #include <iostream>
-
+#include <cassert>
 #include <SDL2/SDL.h>
 
 #include "../../Utils/Collisions.h"
@@ -155,13 +155,14 @@ void TankServer::run()
         if (state == TankMessageServer::ServerState::GAME_OVER)
         {
             Uint32 frameTime = SDL_GetTicks() - startTime;
-            if(timer <= 3500)
+            if(timer <= GAME_OVER_TIME)
                 timer += frameTime;
             else 
             {
                 state = TankMessageServer::ServerState::READY;
                 sendStateMessage();
             }
+            printf("%d\n",timer);
         }
     };
 }
