@@ -54,6 +54,9 @@ private:
     Socket client_socket;
 
     std::vector<GameObject *> objs_;
+    std::vector<GameObject *> gObjsToAdd_;
+
+
     Tank *player_1, *player_2;
     Bullet *bullet_1, *bullet_2;
 

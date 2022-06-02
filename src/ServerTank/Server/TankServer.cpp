@@ -13,6 +13,7 @@ TankServer::TankServer(const char *s, const char *p) : server_socket(s, p), dim_
     server_socket.bind();
 
     tank_1 = tank_2 = nullptr;
+    dim_t1 = dim_t2 = Vector2D(0, 0);
 
     state = TankMessageServer::ServerState::WAITING;
 
@@ -24,7 +25,6 @@ void TankServer::reset()
     input_t1 = input_t2 = TankMessageClient::InputType::NONE;
     pos_t1 = Vector2D(200, 360);
     pos_t2 = Vector2D(800, 360);
-    dim_t1 = dim_t2 = Vector2D(0, 0);
     vel_t1 = vel_t2 = Vector2D(0, 0);
     rot_t1 = rot_t2 = 0;
 

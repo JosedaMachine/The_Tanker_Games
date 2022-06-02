@@ -26,15 +26,12 @@ void TankClient::net_message_thread()
 		client_socket.recv(server_recv_msg, net_socket);
 		switch (server_recv_msg.type)
 		{
-		case TankMessageServer::ServerMessageType::UPDATE_STATE:{
+		case TankMessageServer::ServerMessageType::UPDATE_STATE:
 			nextState = server_recv_msg.state;
 			break;
-		}
 		case TankMessageServer::ServerMessageType::UPDATE_INFO:
-		{
 			updateGOsInfo(&server_recv_msg);
 			break;
-		}
 		case TankMessageServer::ServerMessageType::ACTION:
 		{
 			switch (server_recv_msg.action_)
@@ -42,56 +39,40 @@ void TankClient::net_message_thread()
 			case TankMessageServer::ActionType::CREATE_BULLET_1:
 			{
 				if (bullet_1 == nullptr)
-				{
 					// pos_bullet_1 in this context is used as an auxiliar for the creation of each bullet
 					shoot(bullet_1, server_recv_msg.pos_bullet_1, server_recv_msg.dim_bullet);
 					// std::cout << "Bullet created1: " << bullet_1 << "\n";
-				}
 				break;
 			}
 			case TankMessageServer::ActionType::CREATE_BULLET_2: 
-			{
 				if (bullet_2 == nullptr)
-				{
 					// pos_bullet_1 in this context is used as an auxiliar for the creation of each bullet
 					shoot(bullet_2, server_recv_msg.pos_bullet_1, server_recv_msg.dim_bullet);
 					// std::cout << "Bullet created2: " << bullet_2 << "\n";
-				}
 				break;
-			}
 			case TankMessageServer::ActionType::DESTROY_BULLET_1: 
-			{
 				removeBullet(bullet_1);
 				break;
-			}
 			case TankMessageServer::ActionType::DESTROY_BULLET_2: 
-			{
 				removeBullet(bullet_2);
 				break;
-			}
 			case TankMessageServer::ActionType::DAMAGE_1:
-			{
 				removeBullet(bullet_2);
 				std::cout << "Vida 1:" << server_recv_msg.life << "\n";
 				player_1->setLife(server_recv_msg.life);
 				break;
-			}
 			case TankMessageServer::ActionType::DAMAGE_2: 
-			{
 				removeBullet(bullet_1);
 				std::cout << "Vida 2:" << server_recv_msg.life << "\n";
 				player_2->setLife(server_recv_msg.life);
 				break;
-			}
 			case TankMessageServer::ActionType::CREATE_OBSTACLE: 
-			{
 				Obstacle* o = new Obstacle();
 				o->setTransform(server_recv_msg.pos_bullet_1);
 				o->setDimensions(server_recv_msg.dim_bullet.getX(), server_recv_msg.dim_bullet.getY());
 				o->setTexture("./resources/images/obstacle.png");
-				objs_.push_back(o);
+				gObjsToAdd_.push_back(o);
 				break;
-			}
 			}
 			break;
 		}
@@ -335,6 +316,10 @@ void TankClient::playLoad()
 	player_2->setSpeed(speed);
 
 	objs_.push_back(player_2);
+
+	for(int i = 0; i < gObjsToAdd_.size(); i++)
+		objs_.push_back(gObjsToAdd_[i]);
+	gObjsToAdd_.clear();
 }
 
 void TankClient::clearGameObjects()
