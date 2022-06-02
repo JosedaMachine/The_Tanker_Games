@@ -7,21 +7,17 @@
 TankServer::TankServer(const char *s, const char *p) : server_socket(s, p), dim_b(15, 15)
 {
     srand((unsigned)time(NULL));
-    
+
     server_socket.bind();
 
     tank_1 = tank_2 = nullptr;
 
     state = TankMessageServer::ServerState::WAITING;
 
-    t1_ready = false;
-    t2_ready = false;
-    lifeT1 = lifeT2 = 3;
-
-    init();
+    reset();
 };
 
-void TankServer::init()
+void TankServer::reset()
 {
     input_t1 = input_t2 = TankMessageClient::InputType::NONE;
     pos_t1 = Vector2D(200, 360);
@@ -33,11 +29,18 @@ void TankServer::init()
     shoot_t1 = false;
     pos_b1 = vel_b1 = Vector2D(0, 0);
     pos_b2 = vel_b2 = Vector2D(0, 0);
+
+    t1_ready = false;
+    t2_ready = false;
+    lifeT1 = lifeT2 = 3;
+
+    obstacles_.clear();
 }
 
 void TankServer::game_thread()
 {
-    while (true) {
+    while (true)
+    {
         TankMessageClient client_recv_msg;
         Socket *client_player_sock = new Socket(server_socket);
         server_socket.recv(client_recv_msg, client_player_sock);
@@ -46,9 +49,6 @@ void TankServer::game_thread()
         {
         case TankMessageClient::ClientMessageType::REGISTER:
         { // - REGISTER: register player on server data base
-            if (client_player_sock == nullptr)
-                std::cout << "Is NULL\n";
-
             int pl;
             if (addPlayer(client_player_sock, pl))
                 initPlayer(pl, &client_recv_msg);
@@ -63,12 +63,10 @@ void TankServer::game_thread()
         break;
         case TankMessageClient::ClientMessageType::QUIT:
         { // - QUIT: remove player from server data base
-            if (client_player_sock == nullptr)
-                std::cout << "Is NULL\n";
-
             removePlayer(client_player_sock);
 
-            if (tank_1 == nullptr || tank_2 == nullptr) {
+            if (tank_1 == nullptr || tank_2 == nullptr)
+            {
                 state = TankMessageServer::ServerState::WAITING;
                 sendStateMessage();
             }
@@ -86,7 +84,8 @@ void TankServer::game_thread()
     }
 }
 
-void TankServer::createObstacles(){
+void TankServer::createObstacles()
+{
     int numberObstacles = 6;
 
     int minX = 0;
@@ -98,26 +97,27 @@ void TankServer::createObstacles(){
     int minDim = 40;
     int maxDim = 100;
     const int threshold_dim = 10;
-    for (size_t i = 0; i < numberObstacles; i++){
+    for (size_t i = 0; i < numberObstacles; i++)
+    {
         int auxDim = (maxDim - minDim) * ((float)rand() / RAND_MAX) + minDim;
 
-        Vector2D dim(auxDim,auxDim);
+        Vector2D dim(auxDim, auxDim);
 
         Vector2D pos((maxX - minX) * ((float)rand() / RAND_MAX) + minX, (maxY - minY) * ((float)rand() / RAND_MAX) + minY);
-        while(Collisions::collidesWithRotation(pos_t1, dim_t1.getX(), dim_t1.getY(), rot_t1, 
-            pos, dim.getX() + threshold_dim, dim.getY() + threshold_dim, 0) || //Mientras se solape con el tanque 1
-            Collisions::collidesWithRotation(pos_t2, dim_t2.getX(), dim_t2.getY(), rot_t2, 
-            pos, dim.getX() + threshold_dim, dim.getY() + threshold_dim, 0) || //O con el tanque 2
-            outOfBounds(pos, dim, Vector2D(maxX, maxY))) // O se salga de la pantalla
-                //Buscamos nuevas posiciones
-                pos = Vector2D((maxX - minX) * ((float)rand() / RAND_MAX) + minX, (maxY - minY) * ((float)rand() / RAND_MAX) + minY);
+        while (Collisions::collidesWithRotation(pos_t1, dim_t1.getX(), dim_t1.getY(), rot_t1,
+                                                pos, dim.getX() + threshold_dim, dim.getY() + threshold_dim, 0) || // Mientras se solape con el tanque 1
+               Collisions::collidesWithRotation(pos_t2, dim_t2.getX(), dim_t2.getY(), rot_t2,
+                                                pos, dim.getX() + threshold_dim, dim.getY() + threshold_dim, 0) || // O con el tanque 2
+               outOfBounds(pos, dim, Vector2D(maxX, maxY)))                                                        // O se salga de la pantalla
+            // Buscamos nuevas posiciones
+            pos = Vector2D((maxX - minX) * ((float)rand() / RAND_MAX) + minX, (maxY - minY) * ((float)rand() / RAND_MAX) + minY);
 
         Obstacle obs;
         obs.dim = dim;
         obs.pos = pos;
         obstacles_.push_back(obs);
 
-        TankMessageServer msg (pos, dim);
+        TankMessageServer msg(pos, dim);
         msg.type = TankMessageServer::TankMessageServer::ACTION;
         msg.action_ = TankMessageServer::ActionType::CREATE_OBSTACLE;
         server_socket.send(msg, *tank_1);
@@ -138,7 +138,7 @@ void TankServer::run()
             std::cout << "Ojo que empieza\n";
             state = TankMessageServer::ServerState::PLAYING;
             t1_ready = t2_ready = false;
-            // createObstacles();
+            createObstacles();
             sendStateMessage();
         }
 
@@ -348,7 +348,8 @@ void TankServer::stepSimulation()
 
     if (shoot_t1)
     {
-        if (!outOfBounds(pos_b1 + vel_b1, dim_b)) {
+        if (!outOfBounds(pos_b1 + vel_b1, dim_b))
+        {
             pos_b1 = pos_b1 + vel_b1;
         }
         else
@@ -400,7 +401,7 @@ bool TankServer::outOfBounds(const Vector2D pos, Vector2D &dim)
            pos.getY() + dim.getY() > win_height;
 }
 
-bool TankServer::outOfBounds(const Vector2D pos, Vector2D &dim, const Vector2D& limit)
+bool TankServer::outOfBounds(const Vector2D pos, Vector2D &dim, const Vector2D &limit)
 {
     return pos.getX() < 0 || pos.getY() < 0 ||
            pos.getX() + dim.getX() > limit.getX() ||
@@ -417,21 +418,23 @@ void TankServer::checkCollisions()
         printf("Tanques Colisionan\n");
     }
 
-    //Obstacles collision
-    for (size_t i = 0; i < obstacles_.size(); i++){
-        //Tank1 collides with obstacle
+    // Obstacles collision
+    for (size_t i = 0; i < obstacles_.size(); i++)
+    {
+        // Tank1 collides with obstacle
         if (Collisions::collidesWithRotation(pos_t1, dim_t1.getX(), dim_t1.getY(), rot_t1,
-                                         obstacles_[i].pos, obstacles_[i].dim.getX(), obstacles_[i].dim.getY(), 0))
+                                             obstacles_[i].pos, obstacles_[i].dim.getX(), obstacles_[i].dim.getY(), 0))
             pos_t1 = pos_t1 - vel_t1;
 
-        //Tank2 collides with obstacle
+        // Tank2 collides with obstacle
         if (Collisions::collidesWithRotation(pos_t2, dim_t2.getX(), dim_t2.getY(), rot_t2,
-                                         obstacles_[i].pos, obstacles_[i].dim.getX(), obstacles_[i].dim.getY(), 0))
+                                             obstacles_[i].pos, obstacles_[i].dim.getX(), obstacles_[i].dim.getY(), 0))
             pos_t2 = pos_t2 - vel_t2;
 
-        //Bullet 2 collides with obstacle
-        if(shoot_t1 && Collisions::collidesWithRotation(pos_b1, dim_b.getX(), dim_b.getY(), 0,
-                       obstacles_[i].pos, obstacles_[i].dim.getX(), obstacles_[i].dim.getY(), 0)){
+        // Bullet 2 collides with obstacle
+        if (shoot_t1 && Collisions::collidesWithRotation(pos_b1, dim_b.getX(), dim_b.getY(), 0,
+                                                         obstacles_[i].pos, obstacles_[i].dim.getX(), obstacles_[i].dim.getY(), 0))
+        {
             shoot_t1 = false;
             TankMessageServer msg;
             msg.type = TankMessageServer::TankMessageServer::ACTION;
@@ -440,9 +443,10 @@ void TankServer::checkCollisions()
             server_socket.send(msg, *tank_2);
         }
 
-        //Bullet 2 collides with obstacle
-        if(shoot_t2 && Collisions::collidesWithRotation(pos_b2, dim_b.getX(), dim_b.getY(), 0,
-                       obstacles_[i].pos, obstacles_[i].dim.getX(), obstacles_[i].dim.getY(), 0)){
+        // Bullet 2 collides with obstacle
+        if (shoot_t2 && Collisions::collidesWithRotation(pos_b2, dim_b.getX(), dim_b.getY(), 0,
+                                                         obstacles_[i].pos, obstacles_[i].dim.getX(), obstacles_[i].dim.getY(), 0))
+        {
             shoot_t2 = false;
             TankMessageServer msg;
             msg.type = TankMessageServer::TankMessageServer::ACTION;
@@ -451,20 +455,30 @@ void TankServer::checkCollisions()
             server_socket.send(msg, *tank_2);
         }
     }
-    
-    //Tank 1 With Bullet 2
-    if(shoot_t2 && Collisions::collidesWithRotation(pos_t1, dim_t1.getX(), dim_t1.getY(), rot_t1,
-                                         pos_b2, dim_b.getX(), dim_b.getY(), 0)){
+
+    // Tank 1 With Bullet 2
+    if (shoot_t2 && Collisions::collidesWithRotation(pos_t1, dim_t1.getX(), dim_t1.getY(), rot_t1,
+                                                     pos_b2, dim_b.getX(), dim_b.getY(), 0))
+    {
         printf("Tank1: Ouch\n");
+
         shoot_t2 = false;
         if (lifeT1 > 0)
             lifeT1--;
 
-        TankMessageServer msg(lifeT1);
-        msg.type = TankMessageServer::TankMessageServer::ACTION;
-        msg.action_ = TankMessageServer::ActionType::DAMAGE_1;
-        server_socket.send(msg, *tank_1);
-        server_socket.send(msg, *tank_2);
+        if (lifeT1 <= 0)
+        {
+            state = TankMessageServer::ServerState::GAME_OVER;
+            sendStateMessage();
+        }
+        else
+        {
+            TankMessageServer msg(lifeT1);
+            msg.type = TankMessageServer::TankMessageServer::ACTION;
+            msg.action_ = TankMessageServer::ActionType::DAMAGE_1;
+            server_socket.send(msg, *tank_1);
+            server_socket.send(msg, *tank_2);
+        }
     }
 
     // Tank 2 With Bullet 1
@@ -472,26 +486,37 @@ void TankServer::checkCollisions()
                                                      pos_b1, dim_b.getX(), dim_b.getY(), 0))
     {
         printf("Tank2: Ouch\n");
+
         shoot_t1 = false;
         if (lifeT2 > 0)
             lifeT2--;
 
-        TankMessageServer msg(lifeT2);
-        msg.type = TankMessageServer::TankMessageServer::ACTION;
-        msg.action_ = TankMessageServer::ActionType::DAMAGE_2;
-        server_socket.send(msg, *tank_1);
-        server_socket.send(msg, *tank_2);
+        if (lifeT2 <= 0)
+        {
+            state = TankMessageServer::ServerState::GAME_OVER;
+            sendStateMessage();
+        }
+        else
+        {
+            TankMessageServer msg(lifeT2);
+            msg.type = TankMessageServer::TankMessageServer::ACTION;
+            msg.action_ = TankMessageServer::ActionType::DAMAGE_2;
+            server_socket.send(msg, *tank_1);
+            server_socket.send(msg, *tank_2);
+        }
     }
 }
 
-void TankServer::sendStateMessage() {
-    // printf("%d", state);
-
+void TankServer::sendStateMessage()
+{
     TankMessageServer msg(state);
     msg.type = TankMessageServer::TankMessageServer::UPDATE_STATE;
 
-    if(tank_1 != nullptr)
+    if (tank_1 != nullptr)
         server_socket.send(msg, *tank_1);
-    if(tank_2 != nullptr)
+    if (tank_2 != nullptr)
         server_socket.send(msg, *tank_2);
+
+    if (state != TankMessageServer::ServerState::PLAYING)
+        reset();
 }

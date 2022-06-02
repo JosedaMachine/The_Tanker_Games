@@ -12,7 +12,7 @@
 #define TICK_RATE 16666 // microseconds
 #define BULLET_SIZE 10
 
-struct Obstacle{
+struct Obstacle {
     Vector2D pos;
     Vector2D dim;
 };
@@ -55,7 +55,7 @@ private:
 
     std::vector<Obstacle> obstacles_;
 
-    void init();
+    void reset();
 
     void saveInput(Socket* player_sock, TankMessageClient::InputType input);
     void handleInput();

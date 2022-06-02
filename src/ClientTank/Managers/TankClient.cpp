@@ -13,29 +13,9 @@
 #include "GameManager.h"
 
 TankClient::TankClient(const char *s, const char *p) : client_socket(s, p), player_1(nullptr), player_2(nullptr), bullet_1(nullptr), bullet_2(nullptr),
-														   currentState(TankMessageServer::ServerState::WAITING), nextState(TankMessageServer::ServerState::EMPTY){};
+								currentState(TankMessageServer::ServerState::WAITING), nextState(TankMessageServer::ServerState::EMPTY){};
 
 TankClient::~TankClient() {}
-
-void TankClient::init(int w, int h)
-{
-	Environment::init("The Tanker's Games", w, h);
-	GameManager::init();
-
-	InitData data;
-	data.dim = Vector2D(TANK_SIZE, TANK_SIZE);
-	data.rot = 0;
-
-	changeState(currentState);
-
-	// init connection
-	std::thread([this]()
-				{ net_message_thread(); })
-		.detach();
-
-	sendMatchMessage(TankMessageClient::ClientMessageType::REGISTER, &data);
-	std::cout << "Trying to log...\n";
-}
 
 void TankClient::net_message_thread()
 {
@@ -43,17 +23,11 @@ void TankClient::net_message_thread()
 	Socket *net_socket = new Socket(client_socket);
 	while (true)
 	{
-		std::cout << "Im about to recevie someth\n";
 		client_socket.recv(server_recv_msg, net_socket);
-
-		std::cout << "Message: " << server_recv_msg.type << "\n";
-
 		switch (server_recv_msg.type)
 		{
 		case TankMessageServer::ServerMessageType::UPDATE_STATE:{
 			nextState = server_recv_msg.state;
-			std::cout << "Cambio de estado:" << nextState << "\n";
-			// printf("%d", server_recv_msg.state);
 			break;
 		}
 		case TankMessageServer::ServerMessageType::UPDATE_INFO:
@@ -125,44 +99,24 @@ void TankClient::net_message_thread()
 	}
 }
 
-void TankClient::removeBullet(Bullet *&bullet) {
-	if (bullet != nullptr) {
-		bullet->setEnabled(false);
-		bullet = nullptr;
-	}
-}
-
-void TankClient::shoot(Bullet *&bullet, const Vector2D &pos, const Vector2D &dim) {
-	bullet = new Bullet();
-	bullet->setTransform(pos.getX(), pos.getY());
-	bullet->setDimensions(dim.getX(), dim.getY());
-	bullet->setTexture("./resources/images/bullet.png");
-	objs_.push_back(bullet);
-
-	// if (bullet == bullet_1)
-	// 	std::cout << "Me he creado1\n";
-	// else if (bullet == bullet_2)
-	// 	std::cout << "Me he creado2\n";
-	// else
-	// 	std::cout << "Esto pinta mal\n";
-}
-
-void TankClient::updateGOsInfo(TankMessageServer *msg)
+void TankClient::init(int w, int h)
 {
-	if(currentState == TankMessageServer::ServerState::PLAYING){
-		// //playerOne
-		player_1->setTransform(msg->pos_t1);
-		player_1->setRotation(msg->rot_t1);
-		// //playerTwo
-		player_2->setTransform(msg->pos_t2);
-		player_2->setRotation(msg->rot_t2);
+	Environment::init("The Tanker's Games", w, h);
+	GameManager::init();
 
-		if (bullet_1)
-			bullet_1->setTransform(msg->pos_bullet_1);
+	InitData data;
+	data.dim = Vector2D(TANK_SIZE, TANK_SIZE);
+	data.rot = 0;
 
-		if (bullet_2)
-			bullet_2->setTransform(msg->pos_bullet_2);
-	}
+	changeState(currentState);
+
+	// init connection
+	std::thread([this]()
+				{ net_message_thread(); })
+		.detach();
+
+	sendMatchMessage(TankMessageClient::ClientMessageType::REGISTER, &data);
+	std::cout << "Trying to log...\n";
 }
 
 void TankClient::run()
@@ -172,13 +126,6 @@ void TankClient::run()
 	// animation loop
 	while (nextState != TankMessageServer::ServerState::SERVER_QUIT)
 	{
-		if(currentState == 2){
-			std::cout << "Relajado _1\n";
-		}
-		if(currentState == 1){
-					std::cout << "INICIANDO\n";
-		}
-
 		checkState();
 
 		Uint32 startTime = environment().currRealTime();
@@ -196,17 +143,9 @@ void TankClient::run()
 				continue;
 			}
 
-			for (auto &o : objs_){
+			for (auto &o : objs_)
 				if (o->isEnabled())
 					o->handleInput(event);
-				if(currentState == 1){
-					std::cout << "Input\n";
-				}
-
-				if(currentState == 2){
-					std::cout << "Relajado _2\n";
-				}
-			}
 		}
 
 		if (currentState == TankMessageServer::ServerState::SERVER_QUIT)
@@ -219,50 +158,81 @@ void TankClient::run()
 
 		refresh();
 
-		environment().clearRenderer();
+		environment().clearRenderer({0, 0, 0});
 
 		// render
-		for (auto &o : objs_){
-			if(currentState == 1){
-					std::cout << "Renderizando\n";
-			}
-
-			if(currentState == 2){
-					std::cout << "Relajado _3\n";
-			}
+		for (auto &o : objs_)
 			if (o->isEnabled())
 				o->render();
-		}
-
-		if(currentState == 1){
-			std::cout << "A Presentar\n";
-		}
 
 		environment().presentRenderer();
-
-		if(currentState == 1){
-			std::cout << "Presentado\n";
-		}
 
 		Uint32 frameTime = environment().currRealTime() - startTime;
 		if (frameTime < 20)
 			SDL_Delay(20 - frameTime);
-
-		if(currentState == 1){
-			std::cout << "=================\n";
-		}
 	}
 
 	sendMatchMessage(TankMessageClient::ClientMessageType::QUIT);
 	std::cout << "Quitting...\n";
 }
 
+void TankClient::shutdown()
+{
+	clearGameObjects();
+}
+
+void TankClient::refresh()
+{
+	objs_.erase(std::remove_if(objs_.begin(), objs_.end(),
+							   [](const GameObject *e)
+							   {
+								   if (e->isEnabled())
+									   return false;
+								   else
+								   {
+									   delete e;
+									   return true;
+								   }
+							   }),
+				objs_.end());
+}
+
+void TankClient::removeBullet(Bullet *&bullet) {
+	if (bullet != nullptr) {
+		bullet->setEnabled(false);
+		bullet = nullptr;
+	}
+}
+
+void TankClient::shoot(Bullet *&bullet, const Vector2D &pos, const Vector2D &dim) {
+	bullet = new Bullet();
+	bullet->setTransform(pos.getX(), pos.getY());
+	bullet->setDimensions(dim.getX(), dim.getY());
+	bullet->setTexture("./resources/images/bullet.png");
+
+	objs_.push_back(bullet);
+}
+
+void TankClient::updateGOsInfo(TankMessageServer *msg)
+{
+	if(currentState == TankMessageServer::ServerState::PLAYING) {
+		// //playerOne
+		player_1->setTransform(msg->pos_t1);
+		player_1->setRotation(msg->rot_t1);
+		// //playerTwo
+		player_2->setTransform(msg->pos_t2);
+		player_2->setRotation(msg->rot_t2);
+
+		if (bullet_1)
+			bullet_1->setTransform(msg->pos_bullet_1);
+
+		if (bullet_2)
+			bullet_2->setTransform(msg->pos_bullet_2);
+	}
+}
+
 void TankClient::sendMatchMessage(TankMessageClient::ClientMessageType msg, InitData *data)
 {	
-	if(currentState == 1){
-		std::cout << "Mandando Mensaje\n";
-	}
-
 	TankMessageClient login;
 	login.type = msg;
 
@@ -283,41 +253,32 @@ void TankClient::sendGameMessage(TankMessageClient::InputType input)
 
 void TankClient::checkState()
 {
-	if(currentState == 2){
-		std::cout << "Relajado _4\n";
-	}
-
-	if(currentState == 1){
-		std::cout << "Check Estado\n";
-	}
-
 	if (nextState != TankMessageServer::ServerState::EMPTY && currentState != nextState)
 	{
-		changeState(nextState);
+		changeState(nextState); // this makes it so there's no problems with thread
+
 		currentState = nextState;
 		nextState = TankMessageServer::ServerState::EMPTY;
+
 		printf("Curr St: %d -- Next St: %d \n", (int)currentState, (int)nextState);
 	}
 }
 
-void TankClient::changeState(const TankMessageServer::ServerState s)
+void TankClient::changeState(const TankMessageServer::ServerState state)
 {
 	clearGameObjects();
 
-	switch (s)
+	switch (state)
 	{
 	case TankMessageServer::ServerState::WAITING:
-		std::cout << "Espero\n";
-		loadScreen("./resources/images/tank_blue.png", "./resources/fonts/NES-Chimera.ttf", "waitin",
+		loadScreen("./resources/images/title.png", "./resources/fonts/NES-Chimera.ttf", "Waiting player...",
 				   Vector2D(0, 0), Vector2D(100, 20), {0, 255, 0}, 10);
 		break;
 	case TankMessageServer::ServerState::READY:
-		std::cout << "Listo\n";
-		loadScreen("./resources/images/tank_red.png", "./resources/fonts/NES-Chimera.ttf", "ready",
+		loadScreen("./resources/images/title.png", "./resources/fonts/NES-Chimera.ttf", "Ready to play, press ENTER",
 				   Vector2D(0, 0), Vector2D(100, 20), {0, 255, 0}, 10);
 		break;
 	case TankMessageServer::ServerState::PLAYING:
-		std::cout << "Amo a Jugah\n";
 		playLoad();
 		break;
 	case TankMessageServer::ServerState::GAME_OVER:
@@ -374,33 +335,6 @@ void TankClient::playLoad()
 	player_2->setSpeed(speed);
 
 	objs_.push_back(player_2);
-
-	Font *f = new Font("./resources/fonts/Capture_it.ttf", "Prueba", {255, 0, 0}, 30);
-	f->setTransform(20, 600);
-	f->setDimensions(500, 30);
-
-	objs_.push_back(f);
-}
-
-void TankClient::shutdown()
-{
-	clearGameObjects();
-}
-
-void TankClient::refresh()
-{
-	objs_.erase(std::remove_if(objs_.begin(), objs_.end(),
-							   [](const GameObject *e)
-							   {
-								   if (e->isEnabled())
-									   return false;
-								   else
-								   {
-									   delete e;
-									   return true;
-								   }
-							   }),
-				objs_.end());
 }
 
 void TankClient::clearGameObjects()

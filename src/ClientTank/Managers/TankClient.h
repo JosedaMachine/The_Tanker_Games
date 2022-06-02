@@ -62,7 +62,7 @@ private:
     void net_message_thread();
 
     void checkState();
-    void changeState(const TankMessageServer::ServerState s);
+    void changeState(const TankMessageServer::ServerState state);
     void loadScreen(const std::string &textFile, const std::string &fontFile, const std::string &text,
                     const Vector2D &textPos, const Vector2D &textDim, const SDL_Color &color, const int &size);
     void playLoad();
