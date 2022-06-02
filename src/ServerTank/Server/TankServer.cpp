@@ -4,7 +4,15 @@
 #include <cassert>
 #include <SDL2/SDL.h>
 
+#include <signal.h>
+
 #include "../../Utils/Collisions.h"
+
+bool exit_ = false;
+
+void intHandler(int){
+    exit_ = true;
+}
 
 TankServer::TankServer(const char *s, const char *p) : server_socket(s, p), dim_b(15, 15) {
     srand((unsigned)time(NULL));
@@ -12,11 +20,15 @@ TankServer::TankServer(const char *s, const char *p) : server_socket(s, p), dim_
     server_socket.bind();
     tank_1 = tank_2 = nullptr;
     dim_t1 = dim_t2 = Vector2D(0, 0);
-
     state = TankMessageServer::ServerState::WAITING;
+
+    struct sigaction act;
+    act.sa_handler = intHandler;
+    sigaction(SIGINT, &act, NULL);
 
     reset();
 };
+
 
 void TankServer::reset()
 {
@@ -88,11 +100,11 @@ void TankServer::createObstacles()
 {
     int numberObstacles = 13;
 
-    int minX = win_widthL;
-    int maxX = win_width - 200;
+    int minX = win_widthL + 100;
+    int maxX = win_width - 100;
 
-    int minY = win_heightT;
-    int maxY = win_height - 200;
+    int minY = win_heightT + 100;
+    int maxY = win_height - 100;
 
     int minDim = 50;
     int maxDim = 100;
@@ -127,7 +139,7 @@ void TankServer::createObstacles()
 
 void TankServer::run()
 {
-    while (true)
+    while (!exit_)
     {
         input_mutex.lock(); // mutex lock so we are save from alterations
         handleInput();
@@ -159,7 +171,6 @@ void TankServer::run()
             printf("%d\n",SDL_GetTicks() - timer);
         }
     }
-
     state = TankMessageServer::ServerState::SERVER_QUIT;
     sendStateMessage();    
     std::cout << "Quit Server\n";
