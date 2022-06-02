@@ -6,7 +6,7 @@
 #include "Serializable.h"
 #include "Vector2D.h"
 
-#define SERVER_MESSAGE_SIZE sizeof(ServerMessageType) + sizeof(ActionType) + 5 * sizeof(Vector2D) + 2 * sizeof(float) + sizeof(bool) + sizeof(ServerState) + sizeof(int)
+#define SERVER_MESSAGE_SIZE sizeof(ServerMessageType) + sizeof(ActionType) + 5 * sizeof(Vector2D) + 2 * sizeof(float) + sizeof(bool)*2 + sizeof(ServerState) + sizeof(int)
 
 class TankMessageServer: public Serializable
 {
@@ -65,5 +65,6 @@ public:
 
     int life;
 
+    bool playerOneHasWon;
     ServerState state;
 };

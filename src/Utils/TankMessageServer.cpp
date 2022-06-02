@@ -40,6 +40,9 @@ void TankMessageServer::to_bin() {
     tmp += sizeof(ServerState);
 
     memcpy(tmp, &life, sizeof(int));
+    tmp += sizeof(int);
+
+    memcpy(tmp, &playerOneHasWon, sizeof(bool));
 }
 
 int TankMessageServer::from_bin(char * bobj)
@@ -83,6 +86,9 @@ int TankMessageServer::from_bin(char * bobj)
     tmp += sizeof(ServerState);
 
     memcpy(&life, tmp, sizeof(int));
+    tmp += sizeof(int);
+
+    memcpy(&playerOneHasWon,tmp, sizeof(bool));
 
     return 0;
 }

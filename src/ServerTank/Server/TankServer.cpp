@@ -6,12 +6,10 @@
 
 #include "../../Utils/Collisions.h"
 
-TankServer::TankServer(const char *s, const char *p) : server_socket(s, p), dim_b(15, 15)
-{
+TankServer::TankServer(const char *s, const char *p) : server_socket(s, p), dim_b(15, 15) {
     srand((unsigned)time(NULL));
 
     server_socket.bind();
-
     tank_1 = tank_2 = nullptr;
     dim_t1 = dim_t2 = Vector2D(0, 0);
 
@@ -88,7 +86,7 @@ void TankServer::game_thread()
 
 void TankServer::createObstacles()
 {
-    int numberObstacles = 6;
+    int numberObstacles = 10;
 
     int minX = 0;
     int maxX = win_width - 200;
@@ -96,9 +94,9 @@ void TankServer::createObstacles()
     int minY = 0;
     int maxY = win_height - 200;
 
-    int minDim = 40;
+    int minDim = 50;
     int maxDim = 100;
-    const int threshold_dim = 10;
+    const int threshold_dim = 20;
     for (size_t i = 0; i < numberObstacles; i++)
     {
         int auxDim = (maxDim - minDim) * ((float)rand() / RAND_MAX) + minDim;
@@ -139,7 +137,6 @@ void TankServer::run()
         {
             state = TankMessageServer::ServerState::PLAYING;
             t1_ready = t2_ready = false;
-            timer = 0;
             createObstacles();
             sendStateMessage();
         }
@@ -151,20 +148,21 @@ void TankServer::run()
             usleep(TICK_RATE);
         }
 
-        Uint32 startTime = SDL_GetTicks();
-        if (state == TankMessageServer::ServerState::GAME_OVER)
-        {
-            Uint32 frameTime = SDL_GetTicks() - startTime;
-            if(timer <= GAME_OVER_TIME)
-                timer += frameTime;
-            else 
-            {
+        // std::cout << startTime << "\n";
+        if (state == TankMessageServer::ServerState::GAME_OVER){
+            // Uint32 frameTime = SDL_GetTicks() - startTime;
+            if(SDL_GetTicks() - timer > GAME_OVER_TIME) {
+                timer = 0;
                 state = TankMessageServer::ServerState::READY;
                 sendStateMessage();
             }
-            printf("%d\n",timer);
+            printf("%d\n",SDL_GetTicks() - timer);
         }
-    };
+    }
+
+    state = TankMessageServer::ServerState::SERVER_QUIT;
+    sendStateMessage();    
+    std::cout << "Quit Server\n";
 }
 
 bool TankServer::addPlayer(Socket *player_sock, int &pl)
@@ -452,6 +450,7 @@ void TankServer::checkCollisions()
         if (lifeT1 <= 0)
         {
             state = TankMessageServer::ServerState::GAME_OVER;
+            timer = SDL_GetTicks();
             sendStateMessage();
         }
         else
@@ -477,6 +476,7 @@ void TankServer::checkCollisions()
         if (lifeT2 <= 0)
         {
             state = TankMessageServer::ServerState::GAME_OVER;
+            timer = SDL_GetTicks();
             sendStateMessage();
         }
         else
@@ -495,6 +495,9 @@ void TankServer::sendStateMessage()
     TankMessageServer msg(state);
     msg.type = TankMessageServer::TankMessageServer::UPDATE_STATE;
 
+    if(state == TankMessageServer::ServerState::GAME_OVER)
+        msg.playerOneHasWon = lifeT2 == 0;
+    
     if (tank_1 != nullptr)
         server_socket.send(msg, *tank_1);
     if (tank_2 != nullptr)

@@ -27,7 +27,6 @@ public:
     
     // main game loop
     void run();
-    void createObstacles();
 
 private:
     Socket server_socket;
@@ -63,6 +62,7 @@ private:
 
     void saveInput(Socket* player_sock, TankMessageClient::InputType input);
     void handleInput();
+    void createObstacles();
 
     bool addPlayer(Socket* player_sock, int& pl);
     void removePlayer(Socket* player_sock);

@@ -13,7 +13,7 @@
 #include "GameManager.h"
 
 TankClient::TankClient(const char *s, const char *p) : client_socket(s, p), player_1(nullptr), player_2(nullptr), bullet_1(nullptr), bullet_2(nullptr),
-								currentState(TankMessageServer::ServerState::WAITING), nextState(TankMessageServer::ServerState::EMPTY){};
+								tank_1_won(false), currentState(TankMessageServer::ServerState::WAITING), nextState(TankMessageServer::ServerState::EMPTY){};
 
 TankClient::~TankClient() {}
 
@@ -28,6 +28,8 @@ void TankClient::net_message_thread()
 		{
 		case TankMessageServer::ServerMessageType::UPDATE_STATE:
 			nextState = server_recv_msg.state;
+			if(nextState == TankMessageServer::ServerState::GAME_OVER)
+				tank_1_won = server_recv_msg.playerOneHasWon;
 			break;
 		case TankMessageServer::ServerMessageType::UPDATE_INFO:
 			updateGOsInfo(&server_recv_msg);
@@ -251,21 +253,33 @@ void TankClient::changeState(const TankMessageServer::ServerState state)
 
 	switch (state)
 	{
-	case TankMessageServer::ServerState::WAITING:
-		loadScreen("./resources/images/title.png", "./resources/fonts/NES-Chimera.ttf", "Waiting for another player to connect...",
-				   Vector2D(50, 600), Vector2D(1000, 50), {255, 255, 255}, 50);
+	case TankMessageServer::ServerState::WAITING:{
+		int x = 780;
+		loadScreen("./resources/images/init.png", "./resources/fonts/NES-Chimera.ttf", "Waiting for another player to connect...",
+				   Vector2D(640 - (x/2), 600), Vector2D(x, 50), {0, 0, 0}, 20);
 		break;
-	case TankMessageServer::ServerState::READY:
-		loadScreen("./resources/images/title.png", "./resources/fonts/NES-Chimera.ttf", "Ready to play, press ENTER",
-				   Vector2D(200, 600), Vector2D(700, 50), {125, 125, 125}, 50);
+	}
+	case TankMessageServer::ServerState::READY:{
+		int x = 670;
+		loadScreen("./resources/images/init.png", "./resources/fonts/NES-Chimera.ttf", "Ready to play, press ENTER",
+				   Vector2D(640 - (x/2) - 10, 600), Vector2D(x, 50), {208, 72, 72}, 20);
 		break;
+	}
 	case TankMessageServer::ServerState::PLAYING:
+		std::cout << "Juega";
 		playLoad();
 		break;
-	case TankMessageServer::ServerState::GAME_OVER:
-		loadScreen("./resources/images/title.png", "./resources/fonts/NES-Chimera.ttf", "Player 'X' Win!",
-				Vector2D(200, 600), Vector2D(700, 50), {125, 125, 125}, 50);
+	case TankMessageServer::ServerState::GAME_OVER:{
+		int x = 700;
+		std::string pl = tank_1_won == true ? "1" : "2";
+		SDL_Color color;
+		if(tank_1_won) color = {67, 226, 114};
+		else color = {226, 83, 67};
+		
+		loadScreen("./resources/images/init.png", "./resources/fonts/NES-Chimera.ttf", "Player " + pl + " Win!",
+				Vector2D(640 - (x/2), 600), Vector2D(x, 50), color, 20);
 		break;
+	}
 	default:
 		break;
 	}
@@ -297,6 +311,10 @@ void TankClient::playLoad()
 
 	objs_.push_back(bG);
 
+	for(int i = 0; i < gObjsToAdd_.size(); i++)
+		objs_.push_back(gObjsToAdd_[i]);
+	gObjsToAdd_.clear();
+
 	float speed = 2.0f;
 	float initialLives = 3;
 	player_1 = new Tank(this, initialLives, 30);
@@ -308,7 +326,7 @@ void TankClient::playLoad()
 
 	objs_.push_back(player_1);
 
-	player_2 = new Tank(this, initialLives, 900);
+	player_2 = new Tank(this, initialLives, environment().width() - 3*50 - 21);
 	player_2->setTransform(800, environment().height() / 2);
 	player_2->setDimensions(TANK_SIZE, TANK_SIZE);
 	player_2->setTexture("./resources/images/tank_red.png");
@@ -316,10 +334,6 @@ void TankClient::playLoad()
 	player_2->setSpeed(speed);
 
 	objs_.push_back(player_2);
-
-	for(int i = 0; i < gObjsToAdd_.size(); i++)
-		objs_.push_back(gObjsToAdd_[i]);
-	gObjsToAdd_.clear();
 }
 
 void TankClient::clearGameObjects()
