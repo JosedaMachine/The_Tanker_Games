@@ -153,16 +153,16 @@ void TankServer::handleInput()
     switch (input_t1)
     {
     case TankMessageClient::InputType::LEFT:
-        rot_t1 -= 5.0f;
+        rot_t1 -= 8.0f;
     break;
     case TankMessageClient::InputType::RIGHT:
-        rot_t1 += 5.0f;
+        rot_t1 += 8.0f;
     break;
     case TankMessageClient::InputType::FRONT:
-        vel_t1 = vel_t1 + (Vector2D(0, -1).rotate(rot_t1) * 3.0);
+        vel_t1 = vel_t1 + (Vector2D(0, -1).rotate(rot_t1) * 4.0);
     break;
     case TankMessageClient::InputType::BACK:
-        vel_t1 = vel_t1 + (Vector2D(0, 1).rotate(rot_t1) * 2.0);
+        vel_t1 = vel_t1 + (Vector2D(0, 1).rotate(rot_t1) * 3.5);
     break;
     case TankMessageClient::InputType::SHOOT:
     {
@@ -195,16 +195,16 @@ void TankServer::handleInput()
     switch (input_t2)
     {
     case TankMessageClient::InputType::LEFT:
-        rot_t2 -= 5.0f;
+        rot_t2 -= 8.0f;
     break;
     case TankMessageClient::InputType::RIGHT:
-        rot_t2 += 5.0f;
+        rot_t2 += 8.0f;
     break;
     case TankMessageClient::InputType::FRONT:
-        vel_t2 = vel_t2 + (Vector2D(0, -1).rotate(rot_t2) * 3.0);
+        vel_t2 = vel_t2 + (Vector2D(0, -1).rotate(rot_t2) * 4.0);
     break;
     case TankMessageClient::InputType::BACK:
-        vel_t2 = vel_t2 + (Vector2D(0, 1).rotate(rot_t2) * 2.0);
+        vel_t2 = vel_t2 + (Vector2D(0, 1).rotate(rot_t2) * 3.5);
     break;
     case TankMessageClient::InputType::SHOOT:
     {

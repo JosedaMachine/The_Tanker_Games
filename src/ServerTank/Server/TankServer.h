@@ -11,7 +11,7 @@
 
 #define TICK_RATE 16666 // microseconds
 #define BULLET_SIZE 10
-#define GAME_OVER_TIME 3500
+#define GAME_OVER_TIME 2000
 
 struct Obstacle {
     Vector2D pos;
