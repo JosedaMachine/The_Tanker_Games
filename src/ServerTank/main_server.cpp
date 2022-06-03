@@ -1,7 +1,7 @@
 #include <iostream>
 #include <thread>
 
-#include "Server/TankServer.h"
+#include "./Server/TankServer.h"
 
 int main(int argc, char **argv) {
     if (argc < 3) {
@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
     TankServer server(argv[1], argv[2]);
 
     std::thread([&server](){
-        server.game_thread();
+        server.server_message_thread();
     }).detach();
 
     server.run();

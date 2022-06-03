@@ -1,7 +1,8 @@
 #include "Tank.h"
 
-#include "../../SDL_Utils/Environment.h"
-#include "../../Managers/GameManager.h"
+#include "../SDL_Utils/Environment.h"
+#include "../Managers/GameManager.h"
+
 #include "Heart.h"
 
 Tank::Tank(TankClient* game, int lives, int initialPosHeart) : GameObject(), vel_(), speed_(0) , deacceleration_(0.5), life_(lives) {

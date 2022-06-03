@@ -11,7 +11,3 @@ Background::Background() : GameObject(){
 
 Background::~Background() {
 }
-
-void Background::update(){
-	
-}

@@ -1,8 +1,7 @@
 #ifndef BULLET_H_
 #define BULLET_H_
 
-#include "../../SDL_Utils/GameObject.h"
-#include <vector>
+#include "../SDL_Utils/GameObject.h"
 
 class Bullet: public GameObject {
 public:

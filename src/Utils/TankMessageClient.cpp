@@ -1,13 +1,7 @@
 #include "TankMessageClient.h"
-#include <iostream>
 
 void TankMessageClient::setDefaultValues(const int &w_wL, const int &w_w, const int &w_hT, const int &w_h, const Vector2D &d, const float &r)
 {
-    std::cout << w_wL << "\n";
-    std::cout << w_w << "\n";
-    std::cout << w_hT << "\n";
-    std::cout << w_h << "\n";
-
     win_widthL = w_wL; win_heightT = w_hT;
     win_width = w_w; win_height = w_h;
     dim = d; rot = r;

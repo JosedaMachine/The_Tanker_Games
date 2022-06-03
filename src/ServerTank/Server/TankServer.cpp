@@ -1,55 +1,41 @@
 #include "TankServer.h"
+
 #include <time.h>
+#include <signal.h>
 #include <iostream>
 #include <cassert>
-#include <SDL2/SDL.h>
 
-#include <signal.h>
+#include <SDL2/SDL.h>
 
 #include "../../Utils/Collisions.h"
 
+// Ctrl C handler
 bool exit_ = false;
-
 void intHandler(int){
     exit_ = true;
 }
 
 TankServer::TankServer(const char *s, const char *p) : server_socket(s, p), dim_b(15, 15) {
+    // random seed
     srand((unsigned)time(NULL));
 
+    // bind socket
     server_socket.bind();
-    tank_1 = tank_2 = nullptr;
-    dim_t1 = dim_t2 = Vector2D(0, 0);
-    state = TankMessageServer::ServerState::WAITING;
 
+    // ctrl c handler init
     struct sigaction act;
     act.sa_handler = intHandler;
     sigaction(SIGINT, &act, NULL);
 
+    // default values
+    tank_1 = tank_2 = nullptr;
+    dim_t1 = dim_t2 = Vector2D(0, 0);
+    state = TankMessageServer::ServerState::WAITING;
+
     reset();
 };
 
-
-void TankServer::reset()
-{
-    input_t1 = input_t2 = TankMessageClient::InputType::NONE;
-    pos_t1 = Vector2D(200, 360);
-    pos_t2 = Vector2D(800, 360);
-    vel_t1 = vel_t2 = Vector2D(0, 0);
-    rot_t1 = rot_t2 = 0;
-
-    shoot_t1 = false;
-    pos_b1 = vel_b1 = Vector2D(0, 0);
-    pos_b2 = vel_b2 = Vector2D(0, 0);
-
-    t1_ready = false;
-    t2_ready = false;
-    lifeT1 = lifeT2 = 3;
-
-    obstacles_.clear();
-}
-
-void TankServer::game_thread()
+void TankServer::server_message_thread()
 {
     while (true)
     {
@@ -86,54 +72,12 @@ void TankServer::game_thread()
         break;
         case TankMessageClient::ClientMessageType::HANDLE_INPUT:
         { // - HANDLE_INPUT: handles input sent by client for next simulation step
-
             input_mutex.lock(); // mutex lock so we don't modify values during run loop (handleInput())
             saveInput(client_player_sock, client_recv_msg.input);
             input_mutex.unlock();
         }
         break;
         }
-    }
-}
-
-void TankServer::createObstacles()
-{
-    int numberObstacles = 13;
-
-    int minX = win_widthL + 100;
-    int maxX = win_width - 100;
-
-    int minY = win_heightT + 100;
-    int maxY = win_height - 100;
-
-    int minDim = 50;
-    int maxDim = 100;
-    const int threshold_dim = 50;
-    for (size_t i = 0; i < numberObstacles; i++)
-    {
-        int auxDim = (maxDim - minDim) * ((float)rand() / RAND_MAX) + minDim;
-
-        Vector2D dim(auxDim, auxDim);
-
-        Vector2D pos((maxX - minX) * ((float)rand() / RAND_MAX) + minX, (maxY - minY) * ((float)rand() / RAND_MAX) + minY);
-        while (Collisions::collidesWithRotation(pos_t1, dim_t1.getX(), dim_t1.getY(), rot_t1,
-                                                pos, dim.getX() + threshold_dim, dim.getY() + threshold_dim, 0) || // Mientras se solape con el tanque 1
-               Collisions::collidesWithRotation(pos_t2, dim_t2.getX(), dim_t2.getY(), rot_t2,
-                                                pos, dim.getX() + threshold_dim, dim.getY() + threshold_dim, 0) || // O con el tanque 2
-               outOfBounds(pos, dim, Vector2D(minX, minY), Vector2D(maxX, maxY)))                                                        // O se salga de la pantalla
-            // Buscamos nuevas posiciones
-            pos = Vector2D((maxX - minX) * ((float)rand() / RAND_MAX) + minX, (maxY - minY) * ((float)rand() / RAND_MAX) + minY);
-
-        Obstacle obs;
-        obs.dim = dim;
-        obs.pos = pos;
-        obstacles_.push_back(obs);
-
-        TankMessageServer msg(pos, dim);
-        msg.type = TankMessageServer::TankMessageServer::ACTION;
-        msg.action_ = TankMessageServer::ActionType::CREATE_OBSTACLE;
-        server_socket.send(msg, *tank_1);
-        server_socket.send(msg, *tank_2);
     }
 }
 
@@ -160,85 +104,37 @@ void TankServer::run()
             usleep(TICK_RATE);
         }
 
-        // std::cout << startTime << "\n";
         if (state == TankMessageServer::ServerState::GAME_OVER){
-            // Uint32 frameTime = SDL_GetTicks() - startTime;
             if(SDL_GetTicks() - timer > GAME_OVER_TIME) {
                 timer = 0;
                 state = TankMessageServer::ServerState::READY;
                 sendStateMessage();
             }
-            printf("%d\n",SDL_GetTicks() - timer);
         }
     }
+
     state = TankMessageServer::ServerState::SERVER_QUIT;
     sendStateMessage();    
     std::cout << "Quit Server\n";
 }
 
-bool TankServer::addPlayer(Socket *player_sock, int &pl)
+void TankServer::reset()
 {
-    if ((tank_1 && *player_sock == *tank_1) || (tank_2 && *player_sock == *tank_2))
-    {
-        printf("Player already registered.\n");
-        return false;
-    }
+    input_t1 = input_t2 = TankMessageClient::InputType::NONE;
+    pos_t1 = Vector2D(200, 360);
+    pos_t2 = Vector2D(800, 360);
+    vel_t1 = vel_t2 = Vector2D(0, 0);
+    rot_t1 = rot_t2 = 0;
 
-    if (tank_1 != nullptr && tank_2 != nullptr)
-    {
-        printf("Unable to register player, match already full.\n");
-        return false;
-    }
+    shoot_t1 = false;
+    pos_b1 = vel_b1 = Vector2D(0, 0);
+    pos_b2 = vel_b2 = Vector2D(0, 0);
 
-    if (tank_1 == nullptr)
-    {
-        tank_1 = player_sock;
-        pl = 0;
-        printf("Registered. Player One Ready.\n");
-    }
-    else
-    {
-        tank_2 = player_sock;
-        pl = 1;
-        printf("Registered. Player Two Ready.\n");
-    }
-    return true;
-}
+    t1_ready = false;
+    t2_ready = false;
+    life_t1 = life_t2 = 3;
 
-void TankServer::removePlayer(Socket *player_sock)
-{
-    // I dont know if i should remove too, for now we just nullptr the reference
-    if (tank_1 != nullptr && *player_sock == *tank_1)
-    {
-        printf("Player One Quit\n");
-        tank_1 = nullptr;
-    }
-    else if (tank_2 != nullptr && *player_sock == *tank_2)
-    {
-        printf("Player Two Quit\n");
-        tank_2 = nullptr;
-    }
-    else
-        printf("Player was not registered previously.\n");
-}
-
-void TankServer::initPlayer(const int &pl, const TankMessageClient *msg)
-{
-    win_widthL = msg->win_widthL;
-    win_width = msg->win_width;
-    win_height = msg->win_height;
-    win_heightT = msg->win_heightT;
-
-    if (!pl)
-    {
-        dim_t1 = msg->dim;
-        rot_t1 = msg->rot;
-    }
-    else
-    {
-        dim_t2 = msg->dim;
-        rot_t2 = msg->rot;
-    }
+    obstacles_.clear();
 }
 
 void TankServer::saveInput(Socket *player_sock, TankMessageClient::InputType input)
@@ -341,6 +237,70 @@ void TankServer::handleInput()
     input_t1 = input_t2 = TankMessageClient::InputType::NONE;
 };
 
+bool TankServer::addPlayer(Socket *player_sock, int &pl)
+{
+    if ((tank_1 && *player_sock == *tank_1) || (tank_2 && *player_sock == *tank_2))
+    {
+        printf("Player already registered.\n");
+        return false;
+    }
+
+    if (tank_1 != nullptr && tank_2 != nullptr)
+    {
+        printf("Unable to register player, match already full.\n");
+        return false;
+    }
+
+    if (tank_1 == nullptr)
+    {
+        tank_1 = player_sock;
+        pl = 0;
+        printf("Registered. Player One Ready.\n");
+    }
+    else
+    {
+        tank_2 = player_sock;
+        pl = 1;
+        printf("Registered. Player Two Ready.\n");
+    }
+    return true;
+}
+
+void TankServer::removePlayer(Socket *player_sock)
+{
+    if (tank_1 != nullptr && *player_sock == *tank_1)
+    {
+        printf("Player One Quit.\n");
+        tank_1 = nullptr;
+    }
+    else if (tank_2 != nullptr && *player_sock == *tank_2)
+    {
+        printf("Player Two Quit.\n");
+        tank_2 = nullptr;
+    }
+    else
+        printf("Player was not registered previously.\n");
+}
+
+void TankServer::initPlayer(const int &pl, const TankMessageClient *msg)
+{
+    win_widthL = msg->win_widthL;
+    win_width = msg->win_width;
+    win_height = msg->win_height;
+    win_heightT = msg->win_heightT;
+
+    if (!pl)
+    {
+        dim_t1 = msg->dim;
+        rot_t1 = msg->rot;
+    }
+    else
+    {
+        dim_t2 = msg->dim;
+        rot_t2 = msg->rot;
+    }
+}
+
 void TankServer::stepSimulation()
 {
     if (!outOfBounds(pos_t1 + vel_t1, dim_t1))
@@ -383,28 +343,6 @@ void TankServer::stepSimulation()
     checkCollisions();
 }
 
-void TankServer::updateInfoClients()
-{
-    TankMessageServer msg(pos_t1, pos_t2, rot_t1, rot_t2, shoot_t1, pos_b1, pos_b2);
-    msg.type = TankMessageServer::ServerMessageType::UPDATE_INFO;
-    server_socket.send(msg, *tank_1);
-    server_socket.send(msg, *tank_2);
-}
-
-bool TankServer::outOfBounds(const Vector2D pos, Vector2D &dim)
-{
-    return pos.getX() < win_widthL || pos.getY() < win_heightT ||
-           pos.getX() + dim.getX() > win_width ||
-           pos.getY() + dim.getY() > win_height;
-}
-
-bool TankServer::outOfBounds(const Vector2D pos, Vector2D &dim, const Vector2D& limit1,  const Vector2D &limit)
-{
-    return pos.getX() < limit1.getX() || pos.getY() < limit1.getY() ||
-           pos.getX() + dim.getX() > limit.getX() ||
-           pos.getY() + dim.getY() > limit.getY();
-}
-
 void TankServer::checkCollisions()
 {
     if (Collisions::collidesWithRotation(pos_t1, dim_t1.getX(), dim_t1.getY(), rot_t1,
@@ -412,7 +350,6 @@ void TankServer::checkCollisions()
     {
         pos_t1 = pos_t1 - vel_t1;
         pos_t2 = pos_t2 - vel_t2;
-        printf("Tanques Colisionan\n");
     }
 
     // Obstacles collision
@@ -457,13 +394,13 @@ void TankServer::checkCollisions()
     if (shoot_t2 && Collisions::collidesWithRotation(pos_t1, dim_t1.getX(), dim_t1.getY(), rot_t1,
                                                      pos_b2, dim_b.getX(), dim_b.getY(), 0))
     {
-        printf("Tank1: Ouch\n");
+        printf("Tank_1: Ouch\n");
 
         shoot_t2 = false;
-        if (lifeT1 > 0)
-            lifeT1--;
+        if (life_t1 > 0)
+            life_t1--;
 
-        if (lifeT1 <= 0)
+        if (life_t1 <= 0)
         {
             state = TankMessageServer::ServerState::GAME_OVER;
             timer = SDL_GetTicks();
@@ -471,7 +408,7 @@ void TankServer::checkCollisions()
         }
         else
         {
-            TankMessageServer msg(lifeT1);
+            TankMessageServer msg(life_t1);
             msg.type = TankMessageServer::TankMessageServer::ACTION;
             msg.action_ = TankMessageServer::ActionType::DAMAGE_1;
             server_socket.send(msg, *tank_1);
@@ -483,13 +420,13 @@ void TankServer::checkCollisions()
     if (shoot_t1 && Collisions::collidesWithRotation(pos_t2, dim_t2.getX(), dim_t2.getY(), rot_t2,
                                                      pos_b1, dim_b.getX(), dim_b.getY(), 0))
     {
-        printf("Tank2: Ouch\n");
+        printf("Tank_2: Ouch\n");
 
         shoot_t1 = false;
-        if (lifeT2 > 0)
-            lifeT2--;
+        if (life_t2 > 0)
+            life_t2--;
 
-        if (lifeT2 <= 0)
+        if (life_t2 <= 0)
         {
             state = TankMessageServer::ServerState::GAME_OVER;
             timer = SDL_GetTicks();
@@ -497,7 +434,7 @@ void TankServer::checkCollisions()
         }
         else
         {
-            TankMessageServer msg(lifeT2);
+            TankMessageServer msg(life_t2);
             msg.type = TankMessageServer::TankMessageServer::ACTION;
             msg.action_ = TankMessageServer::ActionType::DAMAGE_2;
             server_socket.send(msg, *tank_1);
@@ -506,13 +443,35 @@ void TankServer::checkCollisions()
     }
 }
 
+bool TankServer::outOfBounds(const Vector2D pos, Vector2D &dim)
+{
+    return pos.getX() < win_widthL || pos.getY() < win_heightT ||
+           pos.getX() + dim.getX() > win_width ||
+           pos.getY() + dim.getY() > win_height;
+}
+
+bool TankServer::outOfBounds(const Vector2D pos, Vector2D &dim, const Vector2D& limit1,  const Vector2D &limit)
+{
+    return pos.getX() < limit1.getX() || pos.getY() < limit1.getY() ||
+           pos.getX() + dim.getX() > limit.getX() ||
+           pos.getY() + dim.getY() > limit.getY();
+}
+
+void TankServer::updateInfoClients()
+{
+    TankMessageServer msg(pos_t1, pos_t2, rot_t1, rot_t2, shoot_t1, pos_b1, pos_b2);
+    msg.type = TankMessageServer::ServerMessageType::UPDATE_INFO;
+    server_socket.send(msg, *tank_1);
+    server_socket.send(msg, *tank_2);
+}
+
 void TankServer::sendStateMessage()
 {
     TankMessageServer msg(state);
     msg.type = TankMessageServer::TankMessageServer::UPDATE_STATE;
 
     if(state == TankMessageServer::ServerState::GAME_OVER)
-        msg.playerOneHasWon = lifeT2 == 0;
+        msg.playerOneHasWon = life_t2 == 0;
     
     if (tank_1 != nullptr)
         server_socket.send(msg, *tank_1);
@@ -521,4 +480,45 @@ void TankServer::sendStateMessage()
 
     if (state != TankMessageServer::ServerState::PLAYING)
         reset();
+}
+
+void TankServer::createObstacles()
+{
+    int numberObstacles = 13;
+
+    int minX = win_widthL + 100;
+    int maxX = win_width - 100;
+
+    int minY = win_heightT + 100;
+    int maxY = win_height - 100;
+
+    int minDim = 50;
+    int maxDim = 100;
+    const int threshold_dim = 50;
+    for (size_t i = 0; i < numberObstacles; i++)
+    {
+        int auxDim = (maxDim - minDim) * ((float)rand() / RAND_MAX) + minDim;
+
+        Vector2D dim(auxDim, auxDim);
+
+        Vector2D pos((maxX - minX) * ((float)rand() / RAND_MAX) + minX, (maxY - minY) * ((float)rand() / RAND_MAX) + minY);
+        while (Collisions::collidesWithRotation(pos_t1, dim_t1.getX(), dim_t1.getY(), rot_t1,
+                                                pos, dim.getX() + threshold_dim, dim.getY() + threshold_dim, 0) || // Mientras se solape con el tanque 1
+               Collisions::collidesWithRotation(pos_t2, dim_t2.getX(), dim_t2.getY(), rot_t2,
+                                                pos, dim.getX() + threshold_dim, dim.getY() + threshold_dim, 0) || // O con el tanque 2
+               outOfBounds(pos, dim, Vector2D(minX, minY), Vector2D(maxX, maxY)))                                                        // O se salga de la pantalla
+            // Buscamos nuevas posiciones
+            pos = Vector2D((maxX - minX) * ((float)rand() / RAND_MAX) + minX, (maxY - minY) * ((float)rand() / RAND_MAX) + minY);
+
+        Obstacle obs;
+        obs.dim = dim;
+        obs.pos = pos;
+        obstacles_.push_back(obs);
+
+        TankMessageServer msg(pos, dim);
+        msg.type = TankMessageServer::TankMessageServer::ACTION;
+        msg.action_ = TankMessageServer::ActionType::CREATE_OBSTACLE;
+        server_socket.send(msg, *tank_1);
+        server_socket.send(msg, *tank_2);
+    }
 }

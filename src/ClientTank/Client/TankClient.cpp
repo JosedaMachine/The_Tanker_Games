@@ -5,19 +5,100 @@
 #include "../SDL_Utils/Environment.h"
 
 #include "../Game/Font.h"
-#include "../Game/Background.h"
-#include "../Game/Tanks/Tank.h"
-#include "../Game/Tanks/Bullet.h"
+#include "../Game/Tank.h"
+#include "../Game/Bullet.h"
 #include "../Game/Obstacle.h"
+#include "../Game/Background.h"
 
-#include "GameManager.h"
+#include "../Managers/GameManager.h"
 
 TankClient::TankClient(const char *s, const char *p) : client_socket(s, p), player_1(nullptr), player_2(nullptr), bullet_1(nullptr), bullet_2(nullptr),
 								tank_1_won(false), currentState(TankMessageServer::ServerState::WAITING), nextState(TankMessageServer::ServerState::EMPTY){};
 
 TankClient::~TankClient() {}
 
-void TankClient::net_message_thread()
+void TankClient::init(int w, int h)
+{
+	Environment::init("The Tanker's Games", w, h);
+	GameManager::init();
+
+	InitData data;
+	data.dim = Vector2D(TANK_SIZE, TANK_SIZE);
+	data.rot = 0;
+
+	changeState(currentState);
+
+	// init connection
+	std::thread([this]()
+				{ client_message_thread(); })
+		.detach();
+
+	sendMatchMessage(TankMessageClient::ClientMessageType::REGISTER, &data);
+	std::cout << "Trying to log...\n";
+}
+
+void TankClient::run()
+{
+	SDL_Event event;
+
+	while (nextState != TankMessageServer::ServerState::SERVER_QUIT)
+	{
+		checkState();
+
+		Uint32 startTime = environment().currRealTime();
+		while (SDL_PollEvent(&event))
+		{
+			//Salir del server
+			if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)) {
+				currentState = TankMessageServer::ServerState::SERVER_QUIT;
+				continue;
+			}
+
+			if ((event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_RETURN)) {
+				std::cout << "Lets Begin\n";
+				sendGameMessage(TankMessageClient::InputType::PLAY);
+				continue;
+			}
+
+			for (auto &o : objs_)
+				if (o->isEnabled())
+					o->handleInput(event);
+		}
+
+		if (currentState == TankMessageServer::ServerState::SERVER_QUIT)
+			break;
+
+		// update
+		for (auto &o : objs_)
+			if (o->isEnabled())
+				o->update();
+
+		refresh();
+
+		environment().clearRenderer({0, 0, 0});
+
+		// render
+		for (auto &o : objs_)
+			if (o->isEnabled())
+				o->render();
+
+		environment().presentRenderer();
+
+		Uint32 frameTime = environment().currRealTime() - startTime;
+		if (frameTime < 20)
+			SDL_Delay(20 - frameTime);
+	}
+
+	sendMatchMessage(TankMessageClient::ClientMessageType::QUIT);
+	std::cout << "Quitting...\n";
+}
+
+void TankClient::shutdown()
+{
+	clearGameObjects();
+}
+
+void TankClient::client_message_thread()
 {
 	TankMessageServer server_recv_msg;
 	Socket *net_socket = new Socket(client_socket);
@@ -82,120 +163,6 @@ void TankClient::net_message_thread()
 	}
 }
 
-void TankClient::init(int w, int h)
-{
-	Environment::init("The Tanker's Games", w, h);
-	GameManager::init();
-
-	InitData data;
-	data.dim = Vector2D(TANK_SIZE, TANK_SIZE);
-	data.rot = 0;
-
-	changeState(currentState);
-
-	// init connection
-	std::thread([this]()
-				{ net_message_thread(); })
-		.detach();
-
-	sendMatchMessage(TankMessageClient::ClientMessageType::REGISTER, &data);
-	std::cout << "Trying to log...\n";
-}
-
-void TankClient::run()
-{
-	SDL_Event event;
-
-	// animation loop
-	while (nextState != TankMessageServer::ServerState::SERVER_QUIT)
-	{
-		checkState();
-
-		Uint32 startTime = environment().currRealTime();
-		while (SDL_PollEvent(&event))
-		{
-			//Salir del server
-			if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)) {
-				currentState = TankMessageServer::ServerState::SERVER_QUIT;
-				continue;
-			}
-
-			if ((event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_RETURN)) {
-				std::cout << "Lets Begin\n";
-				sendGameMessage(TankMessageClient::InputType::PLAY);
-				continue;
-			}
-
-			for (auto &o : objs_)
-				if (o->isEnabled())
-					o->handleInput(event);
-		}
-
-		if (currentState == TankMessageServer::ServerState::SERVER_QUIT)
-			break;
-
-		// update
-		for (auto &o : objs_)
-			if (o->isEnabled())
-				o->update();
-
-		refresh();
-
-		environment().clearRenderer({0, 0, 0});
-
-		// render
-		for (auto &o : objs_)
-			if (o->isEnabled())
-				o->render();
-
-		environment().presentRenderer();
-
-		Uint32 frameTime = environment().currRealTime() - startTime;
-		if (frameTime < 20)
-			SDL_Delay(20 - frameTime);
-	}
-
-	sendMatchMessage(TankMessageClient::ClientMessageType::QUIT);
-	std::cout << "Quitting...\n";
-}
-
-void TankClient::shutdown()
-{
-	clearGameObjects();
-}
-
-void TankClient::refresh()
-{
-	objs_.erase(std::remove_if(objs_.begin(), objs_.end(),
-							   [](const GameObject *e)
-							   {
-								   if (e->isEnabled())
-									   return false;
-								   else
-								   {
-									   delete e;
-									   return true;
-								   }
-							   }),
-				objs_.end());
-}
-
-void TankClient::removeBullet(Bullet *&bullet) {
-	if (bullet != nullptr) {
-		bullet->setEnabled(false);
-		bullet = nullptr;
-	}
-}
-
-void TankClient::shoot(Bullet *&bullet, const Vector2D &pos, const Vector2D &dim) {
-	bullet = new Bullet();
-	bullet->setTransform(pos.getX(), pos.getY());
-	bullet->setDimensions(dim.getX(), dim.getY());
-	bullet->setTexture("./resources/images/bullet.png");
-
-	objs_.push_back(bullet);
-}
-
 void TankClient::updateGOsInfo(TankMessageServer *msg)
 {
 	if(currentState == TankMessageServer::ServerState::PLAYING) {
@@ -214,28 +181,20 @@ void TankClient::updateGOsInfo(TankMessageServer *msg)
 	}
 }
 
-void TankClient::sendMatchMessage(TankMessageClient::ClientMessageType msg, InitData *data)
-{	
-	TankMessageClient login;
-	login.type = msg;
+void TankClient::shoot(Bullet *&bullet, const Vector2D &pos, const Vector2D &dim) {
+	bullet = new Bullet();
+	bullet->setTransform(pos.getX(), pos.getY());
+	bullet->setDimensions(dim.getX(), dim.getY());
+	bullet->setTexture("./resources/images/bullet.png");
 
-	if (data != nullptr)
-		login.setDefaultValues(GameManager::instance()->getRelativeScenerioLimits().getX(), //Left
-							  GameManager::instance()->getScenerioLimits().getX(), //Right
-							  GameManager::instance()->getRelativeScenerioLimits().getY(),//Top 
-							  GameManager::instance()->getScenerioLimits().getY() + 45, //Bottom
-							  data->dim, data->rot);
-
-	client_socket.send(login, client_socket);
-	printf("Sending Match Message...\n");
+	objs_.push_back(bullet);
 }
 
-void TankClient::sendGameMessage(TankMessageClient::InputType input)
-{
-	TankMessageClient login;
-	login.type = TankMessageClient::ClientMessageType::HANDLE_INPUT;
-	login.input = input;
-	client_socket.send(login, client_socket);
+void TankClient::removeBullet(Bullet *&bullet) {
+	if (bullet != nullptr) {
+		bullet->setEnabled(false);
+		bullet = nullptr;
+	}
 }
 
 void TankClient::checkState()
@@ -340,10 +299,52 @@ void TankClient::playLoad()
 	objs_.push_back(player_2);
 }
 
+void TankClient::sendGameMessage(TankMessageClient::InputType input)
+{
+	TankMessageClient login;
+	login.type = TankMessageClient::ClientMessageType::HANDLE_INPUT;
+	login.input = input;
+	client_socket.send(login, client_socket);
+}
+
+void TankClient::sendMatchMessage(TankMessageClient::ClientMessageType msg, InitData *data)
+{	
+	TankMessageClient login;
+	login.type = msg;
+
+	if (data != nullptr)
+		login.setDefaultValues(GameManager::instance()->getRelativeScenerioLimits().getX(), //Left
+							  GameManager::instance()->getScenerioLimits().getX(), //Right
+							  GameManager::instance()->getRelativeScenerioLimits().getY(),//Top 
+							  GameManager::instance()->getScenerioLimits().getY() + 45, //Bottom
+							  data->dim, data->rot);
+
+	client_socket.send(login, client_socket);
+	printf("Sending Match Message...\n");
+}
+
+void TankClient::refresh()
+{
+	objs_.erase(std::remove_if(objs_.begin(), objs_.end(),
+							   [](const GameObject *e)
+							   {
+								   if (e->isEnabled())
+									   return false;
+								   else
+								   {
+									   delete e;
+									   return true;
+								   }
+							   }),
+				objs_.end());
+}
+
 void TankClient::clearGameObjects()
 {
 	for (unsigned int i = 0; i < objs_.size(); i++){
-		delete objs_[i];
+		printf("Destroyed");
+		if(objs_[i] != nullptr)
+			delete objs_[i];
 		objs_[i] = nullptr;
 	}
 	objs_.clear();

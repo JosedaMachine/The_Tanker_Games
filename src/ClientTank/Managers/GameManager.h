@@ -1,5 +1,5 @@
-#ifndef GameManager_H
-#define GameManager_H
+#ifndef GAMEMANAGER_H
+#define GAMEMANAGER_H
 
 #include <string>
 #include <map>
@@ -29,11 +29,9 @@ public:
 
 	// the window's width
 	Vector2D getScenerioLimits();
-
 	Vector2D getRelativeScenerioLimits();
 	
 	void setScenerioLimits(Vector2D limit);
-
 
 private:
 	GameManager();
